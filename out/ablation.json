@@ -1,0 +1,87 @@
+{
+  "rows": [
+    {
+      "config": "naive: equal amount",
+      "kind": "baseline",
+      "precision": 0.9076086956521738,
+      "recall": 0.4744318181818182,
+      "resolution": 0.4744318181818182,
+      "false_positives": 85,
+      "mis_booked_value": 34442060,
+      "booked": 920,
+      "events": 1880,
+      "exceptions": 0
+    },
+    {
+      "config": "naive: amount + 3d window",
+      "kind": "baseline",
+      "precision": 0.8869732542139662,
+      "recall": 0.36363636363636365,
+      "resolution": 0.36363636363636365,
+      "false_positives": 83,
+      "mis_booked_value": 24445520,
+      "booked": 723,
+      "events": 1880,
+      "exceptions": 0
+    },
+    {
+      "config": "no L3 resolver",
+      "kind": "ablation",
+      "precision": 1.0,
+      "recall": 0.4857954545454546,
+      "resolution": 0.5147727272727273,
+      "false_positives": 0,
+      "mis_booked_value": 0,
+      "booked": 855,
+      "events": 1880,
+      "exceptions": 1793
+    },
+    {
+      "config": "no cohort pass",
+      "kind": "ablation",
+      "precision": 1.0,
+      "recall": 0.9318181818181819,
+      "resolution": 0.9886363636363636,
+      "false_positives": 0,
+      "mis_booked_value": 0,
+      "booked": 1640,
+      "events": 1880,
+      "exceptions": 700
+    },
+    {
+      "config": "no policy gate",
+      "kind": "ablation",
+      "precision": 1.0,
+      "recall": 0.9920454545454545,
+      "resolution": 0.9920454545454545,
+      "false_positives": 0,
+      "mis_booked_value": 0,
+      "booked": 1746,
+      "events": 1880,
+      "exceptions": 588
+    },
+    {
+      "config": "LedgerGuard (full)",
+      "kind": "full",
+      "precision": 1.0,
+      "recall": 0.9352272727272727,
+      "resolution": 0.9920454545454545,
+      "false_positives": 0,
+      "mis_booked_value": 0,
+      "booked": 1646,
+      "events": 1880,
+      "exceptions": 688
+    }
+  ],
+  "cost": {
+    "events": 9400,
+    "llm_per_row_tokens": 14100000,
+    "layered_tokens": 6793500,
+    "tokens_saved": 7306500,
+    "pct_routed_to_model": 0.4818085106382979,
+    "llm_per_row_usd": 42.3,
+    "layered_usd": 20.380499999999998,
+    "usd_saved": 21.9195
+  },
+  "n_seeds": 40
+}

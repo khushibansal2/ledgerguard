@@ -1,0 +1,285 @@
+<title>LedgerGuard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --paper:#eef1f4; --card:#ffffff; --ink:#0e1a22; --ink-2:#41525e; --ink-3:#6d7f8b;
+  --line:#d3dbe2; --line-2:#e4eaef;
+  --accent:#0d6a6a; --accent-soft:#e0efee;
+  --good:#2c7a51; --warn:#9a6a15; --bad:#a83a34;
+  --good-soft:#e2f0e8; --warn-soft:#f7ecd8; --bad-soft:#f8e5e3;
+  --shadow:0 1px 2px rgba(14,26,34,.06),0 8px 24px -16px rgba(14,26,34,.28);
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0b1318; --card:#121e25; --ink:#e6edf1; --ink-2:#a8b8c2; --ink-3:#7d8f9a;
+  --line:#243440; --line-2:#1b2932;
+  --accent:#4fb3ac; --accent-soft:#12302f;
+  --good:#5fbf8b; --warn:#d6a94f; --bad:#e0776f;
+  --good-soft:#12291f; --warn-soft:#2c2415; --bad-soft:#2e1a19;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -18px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  --paper:#0b1318; --card:#121e25; --ink:#e6edf1; --ink-2:#a8b8c2; --ink-3:#7d8f9a;
+  --line:#243440; --line-2:#1b2932;
+  --accent:#4fb3ac; --accent-soft:#12302f;
+  --good:#5fbf8b; --warn:#d6a94f; --bad:#e0776f;
+  --good-soft:#12291f; --warn-soft:#2c2415; --bad-soft:#2e1a19;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -18px rgba(0,0,0,.8);
+}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--body);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:clamp(24px,4vw,56px) clamp(16px,4vw,32px) 72px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* masthead */
+.mast{border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:28px}
+.mast__eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+.mast h1{font-family:var(--display);font-weight:700;letter-spacing:-.02em;
+  font-size:clamp(32px,5.5vw,52px);line-height:1.02;margin:0;text-wrap:balance}
+.mast p{margin:12px 0 0;max-width:64ch;color:var(--ink-2);font-size:17px}
+.strip{display:flex;flex-wrap:wrap;gap:0 28px;margin-top:18px;
+  font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.strip b{color:var(--ink-2);font-weight:500}
+
+section{margin-top:44px}
+h2{font-family:var(--display);font-weight:600;letter-spacing:-.01em;
+  font-size:22px;margin:0 0 6px;display:flex;align-items:baseline;gap:12px}
+h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.lede{margin:0 0 20px;color:var(--ink-2);max-width:70ch}
+
+/* kpis */
+.kpis{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:3px;
+  padding:18px 18px 16px;box-shadow:var(--shadow);border-top:3px solid var(--accent)}
+.kpi--good{border-top-color:var(--good)}
+.kpi__label{margin:0;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);font-family:var(--mono)}
+.kpi__value{margin:8px 0 4px;font-family:var(--display);font-weight:700;
+  font-size:38px;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi__sub{margin:0;font-size:13px;color:var(--ink-2);line-height:1.45}
+
+/* flow */
+.flow{display:flex;flex-direction:column;gap:2px}
+.flow__row{display:flex;gap:14px;align-items:flex-start;background:var(--card);
+  border:1px solid var(--line);padding:14px 16px}
+.flow__row:first-child{border-radius:3px 3px 0 0}
+.flow__row:last-child{border-radius:0 0 3px 3px}
+.flow__row+.flow__row{border-top:none}
+.flow__tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;font-weight:600;
+  padding:4px 7px;border-radius:2px;background:var(--accent-soft);color:var(--accent);
+  min-width:46px;text-align:center;margin-top:2px}
+.flow__tag--hold{background:var(--warn-soft);color:var(--warn)}
+.flow__tag--exc{background:var(--bad-soft);color:var(--bad)}
+.flow__body{flex:1;min-width:0}
+.flow__head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.flow__name{font-weight:600}
+.flow__who{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);
+  padding:1px 6px;border-radius:2px}
+.flow__n{margin-left:auto;font-family:var(--mono);font-weight:600;
+  font-variant-numeric:tabular-nums}
+.flow__why{margin:8px 0 0;font-size:13px;color:var(--ink-2)}
+.track{height:6px;background:var(--line-2);border-radius:2px;overflow:hidden;margin-top:8px}
+.track__fill{display:block;height:100%;background:var(--accent);border-radius:2px}
+.track__fill--hold{background:var(--warn)}
+.track__fill--exc{background:var(--bad)}
+.track__fill--good{background:var(--good)}
+.track__fill--warn{background:var(--warn)}
+.track__fill--bad{background:var(--bad)}
+
+/* tables */
+.scroll{overflow-x:auto;background:var(--card);border:1px solid var(--line);
+  border-radius:3px;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line-2)}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;background:var(--paper);position:sticky;top:0}
+tbody tr:last-child td{border-bottom:none}
+.row--full td{background:var(--accent-soft);font-weight:600}
+.num--cost{color:var(--bad)}
+.num--muted{color:var(--ink-3)}
+.pos{color:var(--good)} td.pos{color:var(--good)}
+td.neg{color:var(--bad)}
+.chip{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 6px;border-radius:2px;margin-right:8px;background:var(--line-2);color:var(--ink-3)}
+.chip--full{background:var(--accent);color:#fff}
+.chip--baseline{background:var(--bad-soft);color:var(--bad)}
+
+/* cases */
+.cases{list-style:none;margin:0;padding:0;display:grid;gap:12px;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.case{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:12px 14px}
+.case__head{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.case__name{font-size:13.5px;font-weight:500}
+.case__n{font-size:12px;color:var(--ink-3)}
+
+/* two-up */
+.duo{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+
+/* exceptions */
+.sev-head{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  margin:24px 0 10px;display:flex;align-items:center;gap:10px;color:var(--ink-3)}
+.sev-head__n{background:var(--line-2);border-radius:10px;padding:1px 8px;font-size:11px}
+.sev-head--high{color:var(--bad)} .sev-head--critical{color:var(--bad)}
+.sev-head--medium{color:var(--warn)}
+.exc{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--ink-3);
+  border-radius:3px;padding:14px 16px;margin-bottom:10px}
+.exc--critical,.exc--high{border-left-color:var(--bad)}
+.exc--medium{border-left-color:var(--warn)}
+.exc--low{border-left-color:var(--ink-3)}
+.exc__top{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.exc__cat{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:-.01em}
+.exc__amt{font-weight:600}
+.exc__ids{margin:4px 0 8px;font-size:11.5px;color:var(--ink-3)}
+.exc__reason{margin:0;font-size:14px;color:var(--ink-2)}
+.exc__action{margin:10px 0 0;font-size:13.5px;display:flex;gap:10px;align-items:baseline}
+.exc__action span{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);
+  padding:1px 5px;border-radius:2px;flex:none}
+
+/* position */
+.pos{background:var(--card);border:1px solid var(--line);border-radius:3px;
+  box-shadow:var(--shadow);color:inherit}
+.pos__row{display:flex;justify-content:space-between;gap:16px;padding:11px 16px;
+  border-bottom:1px solid var(--line-2);font-size:14px}
+.pos__row:last-child{border-bottom:none}
+.pos__row--total{font-weight:600;background:var(--accent-soft)}
+.pos__note{margin:10px 0 0;font-size:13px;color:var(--ink-2)}
+.trough{margin:12px 0 0;font-size:13.5px;color:var(--ink-2)}
+.trough--warn{color:var(--bad)}
+
+/* limits */
+.limits{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.limits li{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--warn);
+  border-radius:3px;padding:13px 16px;font-size:14px;color:var(--ink-2)}
+.limits b{color:var(--ink);font-weight:600}
+
+footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:11.5px;color:var(--ink-3);
+  display:flex;flex-wrap:wrap;gap:8px 24px}
+.hash{word-break:break-all}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<div class="wrap">
+
+<header class="mast">
+  <p class="mast__eyebrow">Autonomous finance controller &middot; measured run</p>
+  <h1>LedgerGuard</h1>
+  <p>Reconciles bank, processor and ERP records into a booked ledger and a
+     forward cash position &mdash; and reports, without flattering itself, every
+     item it refused to book and why.</p>
+  <div class="strip">
+    <span><b>200</b> independent batches</span>
+    <span><b>22,618</b> records</span>
+    <span><b>9,400</b> settlement events</span>
+    <span><b>96 ms</b> per batch</span>
+    <span><b>1.48</b> tool calls / event</span>
+    <span><b>0</b> third-party dependencies</span>
+  </div>
+</header>
+
+<section>
+  <h2>Scorecard</h2>
+  <p class="lede">Graded against a truth key the engine never sees. A match rate
+     alone would be a vanity metric, so throughput and error rate are reported
+     side by side &mdash; an engine that books everything scores 100% throughput
+     and destroys the ledger.</p>
+  <div class="kpis"><div class="kpi kpi--good"><p class="kpi__label">Precision</p><p class="kpi__value">99.93%</p><p class="kpi__sub">0 false positives in 9,400 settlement events</p></div><div class="kpi kpi--accent"><p class="kpi__label">Straight-through</p><p class="kpi__value">93.5%</p><p class="kpi__sub">8,230 booked with no human touch</p></div><div class="kpi kpi--accent"><p class="kpi__label">Resolved correctly</p><p class="kpi__value">99.1%</p><p class="kpi__sub">including items held for sign-off</p></div><div class="kpi kpi--good"><p class="kpi__label">Exceptions caught</p><p class="kpi__value">100%</p><p class="kpi__sub">every unmatchable record refused, none dropped</p></div></div>
+</section>
+
+<section>
+  <h2>How work is routed</h2>
+  <p class="lede">Each layer costs more and is trusted less than the one above it.
+     52% of events are settled by arithmetic that
+     cannot hallucinate; only what genuinely fails to tie out reaches a model, and
+     even then the model may only choose which explanation to test &mdash; a
+     deterministic tool computes the answer and a policy gate decides whether it
+     may be booked.</p>
+  <div class="flow"><div class="flow__row"><span class="flow__tag flow__tag--l1">L1</span><div class="flow__body"><div class="flow__head"><span class="flow__name">Exact reference</span><span class="flow__who">no model</span><span class="flow__n">3,400</span></div><div class="track"><span class="track__fill track__fill--l1" style="width:27.9%"></span></div><p class="flow__why">Reference and amount agree to the cent. Proof, not inference.</p></div></div><div class="flow__row"><span class="flow__tag flow__tag--l2">L2</span><div class="flow__body"><div class="flow__head"><span class="flow__name">Entity + timing</span><span class="flow__who">no model</span><span class="flow__n">864</span></div><div class="track"><span class="track__fill track__fill--l2" style="width:7.1%"></span></div><p class="flow__why">Amount ties out; identity and settlement lag are inferred.</p></div></div><div class="flow__row"><span class="flow__tag flow__tag--l3">L3</span><div class="flow__body"><div class="flow__head"><span class="flow__name">Tool-using resolver</span><span class="flow__who">model may plan</span><span class="flow__n">3,966</span></div><div class="track"><span class="track__fill track__fill--l3" style="width:32.6%"></span></div><p class="flow__why">Amount does not tie out. FX, fee, tax or split must close it arithmetically.</p></div></div><div class="flow__row"><span class="flow__tag flow__tag--hold">HOLD</span><div class="flow__body"><div class="flow__head"><span class="flow__name">Policy gate</span><span class="flow__who">human</span><span class="flow__n">501</span></div><div class="track"><span class="track__fill track__fill--hold" style="width:4.1%"></span></div><p class="flow__why">Resolved, but material enough to need a signature.</p></div></div><div class="flow__row"><span class="flow__tag flow__tag--exc">EXC</span><div class="flow__body"><div class="flow__head"><span class="flow__name">Exception ledger</span><span class="flow__who">human</span><span class="flow__n">3,439</span></div><div class="track"><span class="track__fill track__fill--exc" style="width:28.3%"></span></div><p class="flow__why">Refused, with the reason and the next action attached.</p></div></div></div>
+</section>
+
+<section>
+  <h2>Does each layer earn its place?</h2>
+  <p class="lede">The same batches, graded the same way, with one capability
+     removed at a time. Record order is shuffled before every run, so nothing
+     here can be won by positional luck &mdash; which is exactly what dropped the
+     naive baseline from an apparent 100% to 55%.</p>
+  <div class="scroll"><table><thead><tr><th>Configuration</th><th class="num">Precision</th><th class="num">Straight-through</th><th class="num">Resolved</th><th class="num">False pos.</th><th class="num">Mis-booked value</th></tr></thead><tbody><tr class=""><td><span class="chip chip--baseline">baseline</span> naive: equal amount</td><td class="num">90.8%</td><td class="num">47.4%</td><td class="num">47.4%</td><td class="num">85</td><td class="num num--cost">$344,420.60</td></tr><tr class=""><td><span class="chip chip--baseline">baseline</span> naive: amount + 3d window</td><td class="num">88.7%</td><td class="num">36.4%</td><td class="num">36.4%</td><td class="num">83</td><td class="num num--cost">$244,455.20</td></tr><tr class=""><td><span class="chip chip--ablation">ablated</span> no L3 resolver</td><td class="num">100.0%</td><td class="num">48.6%</td><td class="num">51.5%</td><td class="num">0</td><td class="num num--cost">--</td></tr><tr class=""><td><span class="chip chip--ablation">ablated</span> no cohort pass</td><td class="num">100.0%</td><td class="num">93.2%</td><td class="num">98.9%</td><td class="num">0</td><td class="num num--cost">--</td></tr><tr class=""><td><span class="chip chip--ablation">ablated</span> no policy gate</td><td class="num">100.0%</td><td class="num">99.2%</td><td class="num">99.2%</td><td class="num">0</td><td class="num num--cost">--</td></tr><tr class="row--full"><td><span class="chip chip--full">shipped</span> LedgerGuard (full)</td><td class="num">100.0%</td><td class="num">93.5%</td><td class="num">99.2%</td><td class="num">0</td><td class="num num--cost">--</td></tr></tbody></table></div>
+  <p class="pos__note">Sending every row to a model instead would cost
+     <b>14,100,000</b> tokens against <b>6,793,500</b>
+     here &mdash; but the reason to route by layer is not the
+     52% saving, it is that the deterministic
+     layers are the ones that cannot invent an answer.</p>
+</section>
+
+<section>
+  <h2>Is the confidence score honest?</h2>
+  <p class="lede">A confidence number that does not track observed accuracy is
+     decoration, and any policy built on it is meaningless. Pooled over
+     9,400 events:</p>
+  <div class="duo">
+    <div><div class="scroll"><table><thead><tr><th>Confidence band</th><th class="num">Matches</th><th class="num">Observed accuracy</th></tr></thead><tbody><tr><td class="mono">1.00-1.00</td><td class="num">3,200</td><td class="num">100.0%</td></tr><tr><td class="mono">0.95-1.00</td><td class="num">200</td><td class="num">100.0%</td></tr><tr><td class="mono">0.90-0.95</td><td class="num">3,375</td><td class="num">100.0%</td></tr><tr><td class="mono">0.85-0.90</td><td class="num">769</td><td class="num">99.2%</td></tr><tr><td class="mono">0.00-0.85</td><td class="num">686</td><td class="num">100.0%</td></tr></tbody></table></div></div>
+    <div><ul class="cases"><li class="case"><div class="case__head"><span class="case__name">clean 1to1</span><span class="case__n mono">3,200/3,200</span></div><div class="track"><span class="track__fill track__fill--good" style="width:100.0%"></span></div></li><li class="case"><div class="case__head"><span class="case__name">timing lag cross month</span><span class="case__n mono">864/1,200</span></div><div class="track"><span class="track__fill track__fill--bad" style="width:72.0%"></span></div></li><li class="case"><div class="case__head"><span class="case__name">fx plus wire fee</span><span class="case__n mono">1,000/1,000</span></div><div class="track"><span class="track__fill track__fill--good" style="width:100.0%"></span></div></li><li class="case"><div class="case__head"><span class="case__name">stripe gross vs net</span><span class="case__n mono">1,000/1,000</span></div><div class="track"><span class="track__fill track__fill--good" style="width:100.0%"></span></div></li><li class="case"><div class="case__head"><span class="case__name">split remittance</span><span class="case__n mono">566/800</span></div><div class="track"><span class="track__fill track__fill--bad" style="width:70.8%"></span></div></li><li class="case"><div class="case__head"><span class="case__name">tax inclusive vs exclusive</span><span class="case__n mono">800/800</span></div><div class="track"><span class="track__fill track__fill--good" style="width:100.0%"></span></div></li><li class="case"><div class="case__head"><span class="case__name">short pay credit note</span><span class="case__n mono">594/600</span></div><div class="track"><span class="track__fill track__fill--warn" style="width:99.0%"></span></div></li><li class="case"><div class="case__head"><span class="case__name">duplicate billing one paid</span><span class="case__n mono">200/200</span></div><div class="track"><span class="track__fill track__fill--good" style="width:100.0%"></span></div></li></ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>The exception ledger</h2>
+  <p class="lede">One batch, in full. These are the items the controller would not
+     book &mdash; each with the reason it refused and the action it wants a human to
+     take. Nothing is silently dropped; a test asserts that every record in every
+     batch ends up matched, held, or listed here.</p>
+  <h3 class="sev-head sev-head--high">HIGH<span class="sev-head__n">4</span></h3><article class="exc exc--high"><div class="exc__top"><span class="exc__cat">UNIDENTIFIED OUTFLOW</span><span class="exc__amt mono">$318.44</span></div><p class="exc__ids mono">BANK-5040 &middot; money left the account with no document behind it</p><p class="exc__reason">$318.44 settled on 2026-03-14 as &#x27;CARD 4471 UNKNOWN MERCHANT SVC&#x27;, but no open ledger document resembles this counterparty above the 0.80 identity threshold.</p><p class="exc__action"><span>Next</span>Investigate against card/vendor master; possible unrecorded expense or unauthorised debit.</p></article><article class="exc exc--high"><div class="exc__top"><span class="exc__cat">AMOUNT VARIANCE UNEXPLAINED</span><span class="exc__amt mono">$9,880.00</span></div><p class="exc__ids mono">BANK-5042, BILL-3057 &middot; no fee, tax or FX basis explains the difference</p><p class="exc__reason">Settlement $9,880.00 on 2026-03-17 is the closest fit to BILL-3057 ($9,800.00, &#x27;Sable Media Group&#x27;), a variance of $80.00 (0.82%). Tested and rejected: tax, split. No FX rate, fee schedule, statutory tax rate or document subset explains the difference.</p><p class="exc__action"><span>Next</span>Do not book. Confirm the remitted amount against the vendor statement - an unexplained overpayment is the signature of both keying error and invoice fraud.</p></article><article class="exc exc--high"><div class="exc__top"><span class="exc__cat">UNIDENTIFIED OUTFLOW</span><span class="exc__amt mono">$2,750.00</span></div><p class="exc__ids mono">BANK-5041 &middot; money left the account with no document behind it</p><p class="exc__reason">$2,750.00 settled on 2026-03-25 as &#x27;WIRE OUT REF UNAVAILABLE&#x27;, but no open ledger document resembles this counterparty above the 0.80 identity threshold.</p><p class="exc__action"><span>Next</span>Investigate against card/vendor master; possible unrecorded expense or unauthorised debit.</p></article><article class="exc exc--high"><div class="exc__top"><span class="exc__cat">DUPLICATE BILLING</span><span class="exc__amt mono">$4,500.00</span></div><p class="exc__ids mono">BILL-3053 &middot; same invoice raised twice, one settlement</p><p class="exc__reason">Reference INV-63831 for &#x27;Meridian Print Co&#x27; exists on 2 ledger documents at -$4,500.00, but only one settlement was found. Paying both would be a $4,500.00 overpayment.</p><p class="exc__action"><span>Next</span>Block for payment; confirm with vendor and void the duplicate.</p></article><h3 class="sev-head sev-head--medium">MEDIUM<span class="sev-head__n">5</span></h3><article class="exc exc--medium"><div class="exc__top"><span class="exc__cat">POLICY HOLD</span><span class="exc__amt mono">$7,350.00</span></div><p class="exc__ids mono">BANK-5022, BILL-3022 &middot; resolved, but too material to book unattended</p><p class="exc__reason">Resolved at L2_SIMILARITY but held: material item $7,350.00 at confidence 0.85 requires &gt;= 0.88</p><p class="exc__action"><span>Next</span>Controller review; approve to book as proposed.</p></article><article class="exc exc--medium"><div class="exc__top"><span class="exc__cat">POLICY HOLD</span><span class="exc__amt mono">$7,350.00</span></div><p class="exc__ids mono">BANK-5017, BILL-3017 &middot; resolved, but too material to book unattended</p><p class="exc__reason">Resolved at L2_SIMILARITY but held: material item $7,350.00 at confidence 0.85 requires &gt;= 0.88</p><p class="exc__action"><span>Next</span>Controller review; approve to book as proposed.</p></article><article class="exc exc--medium"><div class="exc__top"><span class="exc__cat">POLICY HOLD</span><span class="exc__amt mono">$7,350.00</span></div><p class="exc__ids mono">BANK-5021, BILL-3021 &middot; resolved, but too material to book unattended</p><p class="exc__reason">Resolved at L2_SIMILARITY but held: material item $7,350.00 at confidence 0.81 requires &gt;= 0.88</p><p class="exc__action"><span>Next</span>Controller review; approve to book as proposed.</p></article><article class="exc exc--medium"><div class="exc__top"><span class="exc__cat">POLICY HOLD</span><span class="exc__amt mono">$7,030.25</span></div><p class="exc__ids mono">BANK-5031, BILL-3041, BILL-3038, BILL-3039, BILL-3040 &middot; resolved, but too material to book unattended</p><p class="exc__reason">Resolved at L3_AGENTIC but held: material item $7,030.25 at confidence 0.86 requires &gt;= 0.88</p><p class="exc__action"><span>Next</span>Controller review; approve to book as proposed.</p></article><article class="exc exc--medium"><div class="exc__top"><span class="exc__cat">POLICY HOLD</span><span class="exc__amt mono">$8,655.75</span></div><p class="exc__ids mono">BANK-5030, BILL-3036, BILL-3034, BILL-3035, BILL-3037 &middot; resolved, but too material to book unattended</p><p class="exc__reason">Resolved at L3_AGENTIC but held: material item $8,655.75 at confidence 0.86 requires &gt;= 0.88</p><p class="exc__action"><span>Next</span>Controller review; approve to book as proposed.</p></article><h3 class="sev-head sev-head--low">LOW<span class="sev-head__n">10</span></h3><article class="exc exc--low"><div class="exc__top"><span class="exc__cat">OPEN RECEIVABLE</span><span class="exc__amt mono">$9,300.00</span></div><p class="exc__ids mono">INV-1009 &middot; awaiting customer payment</p><p class="exc__reason">No settlement found in the period. Document dated 2026-03-14, due 2026-04-13.</p><p class="exc__action"><span>Next</span>Chase the counterparty; ageing bucket feeds the cash forecast.</p></article><article class="exc exc--low"><div class="exc__top"><span class="exc__cat">OPEN PAYABLE</span><span class="exc__amt mono">$9,800.00</span></div><p class="exc__ids mono">BILL-3057 &middot; not yet due, no settlement expected</p><p class="exc__reason">No settlement found in the period. Document dated 2026-03-16, due 2026-04-15.</p><p class="exc__action"><span>Next</span>Chase the counterparty; ageing bucket feeds the cash forecast.</p></article><article class="exc exc--low"><div class="exc__top"><span class="exc__cat">OPEN RECEIVABLE</span><span class="exc__amt mono">$26,500.00</span></div><p class="exc__ids mono">INV-1006 &middot; awaiting customer payment</p><p class="exc__reason">No settlement found in the period. Document dated 2026-03-19, due 2026-05-03.</p><p class="exc__action"><span>Next</span>Chase the counterparty; ageing bucket feeds the cash forecast.</p></article><article class="exc exc--low"><div class="exc__top"><span class="exc__cat">OPEN RECEIVABLE</span><span class="exc__amt mono">$15,750.00</span></div><p class="exc__ids mono">INV-1010 &middot; awaiting customer payment</p><p class="exc__reason">No settlement found in the period. Document dated 2026-03-20, due 2026-04-19.</p><p class="exc__action"><span>Next</span>Chase the counterparty; ageing bucket feeds the cash forecast.</p></article><article class="exc exc--low"><div class="exc__top"><span class="exc__cat">OPEN PAYABLE</span><span class="exc__amt mono">$5,200.00</span></div><p class="exc__ids mono">BILL-3055 &middot; not yet due, no settlement expected</p><p class="exc__reason">No settlement found in the period. Document dated 2026-03-22, due 2026-05-06.</p><p class="exc__action"><span>Next</span>Chase the counterparty; ageing bucket feeds the cash forecast.</p></article><article class="exc exc--low"><div class="exc__top"><span class="exc__cat">OPEN RECEIVABLE</span><span class="exc__amt mono">$12,000.00</span></div><p class="exc__ids mono">INV-1007 &middot; awaiting customer payment</p><p class="exc__reason">No settlement found in the period. Document dated 2026-03-25, due 2026-04-24.</p><p class="exc__action"><span>Next</span>Chase the counterparty; ageing bucket feeds the cash forecast.</p></article><article class="exc exc--low"><div class="exc__top"><span class="exc__cat">OPEN RECEIVABLE</span><span class="exc__amt mono">$4,800.00</span></div><p class="exc__ids mono">INV-1008 &middot; awaiting customer payment</p><p class="exc__reason">No settlement found in the period. Document dated 2026-03-25, due 2026-04-24.</p><p class="exc__action"><span>Next</span>Chase the counterparty; ageing bucket feeds the cash forecast.</p></article><article class="exc exc--low"><div class="exc__top"><span class="exc__cat">OPEN PAYABLE</span><span class="exc__amt mono">$5,200.00</span></div><p class="exc__ids mono">BILL-3054 &middot; not yet due, no settlement expected</p><p class="exc__reason">No settlement found in the period. Document dated 2026-03-26, due 2026-05-10.</p><p class="exc__action"><span>Next</span>Chase the counterparty; ageing bucket feeds the cash forecast.</p></article><article class="exc exc--low"><div class="exc__top"><span class="exc__cat">OPEN PAYABLE</span><span class="exc__amt mono">$1,450.60</span></div><p class="exc__ids mono">BILL-3056 &middot; not yet due, no settlement expected</p><p class="exc__reason">No settlement found in the period. Document dated 2026-03-27, due 2026-05-11.</p><p class="exc__action"><span>Next</span>Chase the counterparty; ageing bucket feeds the cash forecast.</p></article><article class="exc exc--low"><div class="exc__top"><span class="exc__cat">OPEN RECEIVABLE</span><span class="exc__amt mono">$12,000.00</span></div><p class="exc__ids mono">INV-1011 &middot; awaiting customer payment</p><p class="exc__reason">No settlement found in the period. Document dated 2026-03-30, due 2026-04-29.</p><p class="exc__action"><span>Next</span>Chase the counterparty; ageing bucket feeds the cash forecast.</p></article>
+</section>
+
+<section>
+  <h2>Cash position</h2>
+  <p class="lede">Built on the matched set, not the raw ledger. A forecast from
+     unreconciled books double-counts: the invoice still sits in receivables while
+     the cash that settled it already sits in the bank balance.</p>
+  <div class="duo">
+    <div><div class="pos"><div class="pos__row"><span>Opening balance</span><span class="mono">$250,000.00</span></div><div class="pos__row"><span>Cleared movements</span><span class="mono">-$139,360.77</span></div><div class="pos__row"><span>Closing bank balance</span><span class="mono">$110,639.23</span></div><div class="pos__row"><span>Open receivables</span><span class="mono">$80,350.00</span></div><div class="pos__row"><span>Open payables</span><span class="mono">-$26,150.60</span></div><div class="pos__row pos__row--total"><span>Net working capital</span><span class="mono">$164,838.63</span></div></div><p class="pos__note">83.0% of settlement events reconciled. 8 unexplained, -$50,684.44, excluded from the forecast rather than assumed away.</p></div>
+    <div><div class="scroll"><table><thead><tr><th>Week</th><th class="num">Expected in</th><th class="num">Committed out</th><th class="num">Expected balance</th><th class="num">Worst case</th></tr></thead><tbody><tr><td class="mono">2026-04-06 &rarr; 2026-04-12</td><td class="num pos">$0.00</td><td class="num neg">-$4,500.00</td><td class="num">$106,139.23</td><td class="num num--muted">$106,139.23</td></tr><tr><td class="mono">2026-04-13 &rarr; 2026-04-19</td><td class="num pos">$23,296.50</td><td class="num neg">-$9,800.00</td><td class="num">$119,635.73</td><td class="num num--muted">$96,339.23</td></tr><tr><td class="mono">2026-04-20 &rarr; 2026-04-26</td><td class="num pos">$15,624.00</td><td class="num neg">$0.00</td><td class="num">$135,259.73</td><td class="num num--muted">$96,339.23</td></tr><tr><td class="mono">2026-04-27 &rarr; 2026-05-03</td><td class="num pos">$35,805.00</td><td class="num neg">$0.00</td><td class="num">$171,064.73</td><td class="num num--muted">$96,339.23</td></tr><tr><td class="mono">2026-05-04 &rarr; 2026-05-05</td><td class="num pos">$0.00</td><td class="num neg">$0.00</td><td class="num">$171,064.73</td><td class="num num--muted">$96,339.23</td></tr></tbody></table></div><p class="trough "><span class="mono">$96,339.23</span> Worst case stays funded across the horizon.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>What it still gets wrong</h2>
+  <p class="lede">Measured over 9,400 settlement events, stated plainly.</p>
+  <ul class="limits">
+    <li><b>69 unresolved (timing lag cross month (69)).</b> All one shape: an
+        unequal cohort of identical amounts &mdash; three indistinguishable bills
+        against two indistinguishable payments. No fact separates them, so the
+        engine refuses instead of guessing, and each one appears on the exception
+        ledger above.</li>
+    <li><b>6 partial matches.</b> Two short-payments from one
+        vendor, each net of a credit note, where the resolver applied the sibling's
+        credit note. The pair nets correctly; the individual application does not.</li>
+    <li><b>The policy gate is unproven on this data.</b> Removing it raises
+        straight-through from 93.5% to 99.2% with no measured loss
+        of precision. It is retained as tail-risk insurance against errors this
+        synthetic distribution does not contain &mdash; a judgement call, not a
+        result the numbers here support.</li>
+    <li><b>Synthetic data is not production data.</b> The FX curve, fee schedules
+        and tax rates are frozen tables. Real books add partial settlements,
+        reversals, chargebacks and multi-currency netting that this build does
+        not yet model.</li>
+  </ul>
+</section>
+
+<footer>
+  <span>Seed 20260827 &middot; as of 2026-04-05</span>
+  <span>115 records in
+        227 ms</span>
+  <span class="hash">audit chain head 732b7eb4807f59aa83dc53052248b7fc7b17bf9d</span>
+</footer>
+
+</div>

@@ -1,0 +1,3378 @@
+{
+  "evaluation": {
+    "totals": {
+      "records": 115,
+      "settlement_events": 47,
+      "ledger_documents": 68,
+      "true_matchable": 44,
+      "booked": 39,
+      "held_for_review": 5,
+      "exceptions": 19
+    },
+    "accuracy": {
+      "precision": 1.0,
+      "recall": 0.8863636363636364,
+      "f1": 0.9397590361445783,
+      "resolution_recall": 1.0,
+      "true_positives": 39,
+      "false_positives": 0,
+      "partial_matches": 0,
+      "cohort_equivalent": 0,
+      "missed": 5,
+      "unresolved": 0,
+      "held_correct": 5,
+      "held_wrong": 0,
+      "straight_through_rate": 0.8297872340425532
+    },
+    "exception_quality": {
+      "should_escalate": 14,
+      "correctly_escalated": 14,
+      "missed_escalation": [],
+      "escalation_recall": 1.0
+    },
+    "calibration": [
+      {
+        "bucket": "1.00-1.00",
+        "n": 16,
+        "accuracy": 1.0,
+        "mean_confidence": 1.0
+      },
+      {
+        "bucket": "0.95-1.00",
+        "n": 1,
+        "accuracy": 1.0,
+        "mean_confidence": 0.97
+      },
+      {
+        "bucket": "0.90-0.95",
+        "n": 16,
+        "accuracy": 1.0,
+        "mean_confidence": 0.9231250000000001
+      },
+      {
+        "bucket": "0.85-0.90",
+        "n": 3,
+        "accuracy": 1.0,
+        "mean_confidence": 0.88
+      },
+      {
+        "bucket": "0.00-0.85",
+        "n": 3,
+        "accuracy": 1.0,
+        "mean_confidence": 0.8335
+      }
+    ],
+    "by_case": {
+      "clean_1to1": {
+        "total": 16,
+        "correct": 16
+      },
+      "duplicate_billing_one_paid": {
+        "total": 1,
+        "correct": 1
+      },
+      "fx_plus_wire_fee": {
+        "total": 5,
+        "correct": 5
+      },
+      "short_pay_credit_note": {
+        "total": 3,
+        "correct": 3
+      },
+      "split_remittance": {
+        "total": 4,
+        "correct": 2
+      },
+      "stripe_gross_vs_net": {
+        "total": 5,
+        "correct": 5
+      },
+      "tax_inclusive_vs_exclusive": {
+        "total": 4,
+        "correct": 4
+      },
+      "timing_lag_cross_month": {
+        "total": 6,
+        "correct": 3
+      }
+    },
+    "layer_mix": {
+      "L1_DETERMINISTIC": 17,
+      "L2_SIMILARITY": 3,
+      "L3_AGENTIC": 19
+    },
+    "tool_calls": 77,
+    "errors": {
+      "false_positives": [],
+      "partial": [],
+      "missed": [
+        {
+          "settlement": [
+            "BANK-5017"
+          ],
+          "ledger": [
+            "BILL-3017"
+          ],
+          "case": "timing_lag_cross_month"
+        },
+        {
+          "settlement": [
+            "BANK-5021"
+          ],
+          "ledger": [
+            "BILL-3021"
+          ],
+          "case": "timing_lag_cross_month"
+        },
+        {
+          "settlement": [
+            "BANK-5022"
+          ],
+          "ledger": [
+            "BILL-3022"
+          ],
+          "case": "timing_lag_cross_month"
+        },
+        {
+          "settlement": [
+            "BANK-5030"
+          ],
+          "ledger": [
+            "BILL-3034",
+            "BILL-3035",
+            "BILL-3036",
+            "BILL-3037"
+          ],
+          "case": "split_remittance"
+        },
+        {
+          "settlement": [
+            "BANK-5031"
+          ],
+          "ledger": [
+            "BILL-3038",
+            "BILL-3039",
+            "BILL-3040",
+            "BILL-3041"
+          ],
+          "case": "split_remittance"
+        }
+      ],
+      "unresolved": [],
+      "held_wrong": []
+    }
+  },
+  "position": {
+    "as_of": "2026-04-05",
+    "opening_balance": 25000000,
+    "cleared_movements": -13936077,
+    "closing_bank_balance": 11063923,
+    "reconciled_pct": 0.8297872340425532,
+    "unreconciled_count": 8,
+    "unreconciled_value": -5068444,
+    "open_payables": -2615060,
+    "open_receivables": 8035000,
+    "net_working_capital": 16483863
+  },
+  "forecast": {
+    "horizon_days": 30,
+    "opening_position": 11063923,
+    "weeks": [
+      {
+        "week": 1,
+        "from": "2026-04-06",
+        "to": "2026-04-12",
+        "expected_inflow": 0,
+        "committed_outflow": -450000,
+        "expected_balance": 10613923,
+        "low_balance": 10613923,
+        "high_balance": 10613923
+      },
+      {
+        "week": 2,
+        "from": "2026-04-13",
+        "to": "2026-04-19",
+        "expected_inflow": 2329650,
+        "committed_outflow": -980000,
+        "expected_balance": 11963573,
+        "low_balance": 9633923,
+        "high_balance": 12138923
+      },
+      {
+        "week": 3,
+        "from": "2026-04-20",
+        "to": "2026-04-26",
+        "expected_inflow": 1562400,
+        "committed_outflow": 0,
+        "expected_balance": 13525973,
+        "low_balance": 9633923,
+        "high_balance": 13818923
+      },
+      {
+        "week": 4,
+        "from": "2026-04-27",
+        "to": "2026-05-03",
+        "expected_inflow": 3580500,
+        "committed_outflow": 0,
+        "expected_balance": 17106473,
+        "low_balance": 9633923,
+        "high_balance": 17668923
+      },
+      {
+        "week": 5,
+        "from": "2026-05-04",
+        "to": "2026-05-05",
+        "expected_inflow": 0,
+        "committed_outflow": 0,
+        "expected_balance": 17106473,
+        "low_balance": 9633923,
+        "high_balance": 17668923
+      }
+    ],
+    "worst_case_trough": 9633923,
+    "liquidity_warning": false,
+    "unreconciled_overhang": -5068444
+  },
+  "ageing": {
+    "receivables": [
+      {
+        "bucket": "current",
+        "count": 6,
+        "amount": 8035000
+      }
+    ],
+    "payables": [
+      {
+        "bucket": "current",
+        "count": 5,
+        "amount": -2615060
+      }
+    ]
+  },
+  "matches": [
+    {
+      "match_id": "M-0001",
+      "settlement_ids": [
+        "BANK-5002"
+      ],
+      "ledger_ids": [
+        "BILL-3002"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-63236 with identical amount -$775.10 and currency.",
+      "evidence": {
+        "reference": "INV-63236",
+        "amount": -77510
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0002",
+      "settlement_ids": [
+        "BANK-5005"
+      ],
+      "ledger_ids": [
+        "BILL-3005"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-49453 with identical amount -$775.10 and currency.",
+      "evidence": {
+        "reference": "INV-49453",
+        "amount": -77510
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0003",
+      "settlement_ids": [
+        "BANK-5009"
+      ],
+      "ledger_ids": [
+        "BILL-3009"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-41002 with identical amount -$775.10 and currency.",
+      "evidence": {
+        "reference": "INV-41002",
+        "amount": -77510
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0004",
+      "settlement_ids": [
+        "BANK-5007"
+      ],
+      "ledger_ids": [
+        "BILL-3007"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-88125 with identical amount -$12,400.25 and currency.",
+      "evidence": {
+        "reference": "INV-88125",
+        "amount": -1240025
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0005",
+      "settlement_ids": [
+        "BANK-5011"
+      ],
+      "ledger_ids": [
+        "BILL-3011"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-67963 with identical amount -$3,300.00 and currency.",
+      "evidence": {
+        "reference": "INV-67963",
+        "amount": -330000
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0006",
+      "settlement_ids": [
+        "BANK-5014"
+      ],
+      "ledger_ids": [
+        "BILL-3014"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-29493 with identical amount -$640.00 and currency.",
+      "evidence": {
+        "reference": "INV-29493",
+        "amount": -64000
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0007",
+      "settlement_ids": [
+        "BANK-5003"
+      ],
+      "ledger_ids": [
+        "BILL-3003"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-14265 with identical amount -$2,115.75 and currency.",
+      "evidence": {
+        "reference": "INV-14265",
+        "amount": -211575
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0008",
+      "settlement_ids": [
+        "BANK-5010"
+      ],
+      "ledger_ids": [
+        "BILL-3010"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-83960 with identical amount -$3,300.00 and currency.",
+      "evidence": {
+        "reference": "INV-83960",
+        "amount": -330000
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0009",
+      "settlement_ids": [
+        "BANK-5013"
+      ],
+      "ledger_ids": [
+        "BILL-3013"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-76207 with identical amount -$3,300.00 and currency.",
+      "evidence": {
+        "reference": "INV-76207",
+        "amount": -330000
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0010",
+      "settlement_ids": [
+        "BANK-5039"
+      ],
+      "ledger_ids": [
+        "BILL-3052"
+      ],
+      "confidence": 0.97,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-63831; 2 identical ledger documents exist - settled against the earliest, remainder flagged as suspected duplicate billing.",
+      "evidence": {
+        "reference": "INV-63831",
+        "duplicates": [
+          "BILL-3052",
+          "BILL-3053"
+        ]
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0011",
+      "settlement_ids": [
+        "BANK-5006"
+      ],
+      "ledger_ids": [
+        "BILL-3006"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-33966 with identical amount -$1,250.00 and currency.",
+      "evidence": {
+        "reference": "INV-33966",
+        "amount": -125000
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0012",
+      "settlement_ids": [
+        "BANK-5008"
+      ],
+      "ledger_ids": [
+        "BILL-3008"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-65981 with identical amount -$1,250.00 and currency.",
+      "evidence": {
+        "reference": "INV-65981",
+        "amount": -125000
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0013",
+      "settlement_ids": [
+        "BANK-5004"
+      ],
+      "ledger_ids": [
+        "BILL-3004"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-34777 with identical amount -$1,250.00 and currency.",
+      "evidence": {
+        "reference": "INV-34777",
+        "amount": -125000
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0014",
+      "settlement_ids": [
+        "BANK-5015"
+      ],
+      "ledger_ids": [
+        "BILL-3015"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-66690 with identical amount -$640.00 and currency.",
+      "evidence": {
+        "reference": "INV-66690",
+        "amount": -64000
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0015",
+      "settlement_ids": [
+        "BANK-5001"
+      ],
+      "ledger_ids": [
+        "BILL-3001"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-91398 with identical amount -$8,900.00 and currency.",
+      "evidence": {
+        "reference": "INV-91398",
+        "amount": -890000
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0016",
+      "settlement_ids": [
+        "BANK-5012"
+      ],
+      "ledger_ids": [
+        "BILL-3012"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-35979 with identical amount -$3,300.00 and currency.",
+      "evidence": {
+        "reference": "INV-35979",
+        "amount": -330000
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0017",
+      "settlement_ids": [
+        "BANK-5016"
+      ],
+      "ledger_ids": [
+        "BILL-3016"
+      ],
+      "confidence": 1.0,
+      "layer": "L1_DETERMINISTIC",
+      "rationale": "Exact reference INV-88553 with identical amount -$775.10 and currency.",
+      "evidence": {
+        "reference": "INV-88553",
+        "amount": -77510
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0020",
+      "settlement_ids": [
+        "BANK-5019"
+      ],
+      "ledger_ids": [
+        "BILL-3019"
+      ],
+      "confidence": 0.8452,
+      "layer": "L2_SIMILARITY",
+      "rationale": "Amount ties to the cent (-$4,820.00). Counterparty 'SABLE MEDIA GRP' matched to 'Sable Media Group' at 1.00; settled 5d after the document date. Crosses the month boundary - accrual cut-off applies.",
+      "evidence": {
+        "amount_exact": true,
+        "counterparty_score": 1.0,
+        "date_lag_days": 5,
+        "date_score": 0.368,
+        "reference_score": 0.0
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0021",
+      "settlement_ids": [
+        "BANK-5020"
+      ],
+      "ledger_ids": [
+        "BILL-3020"
+      ],
+      "confidence": 0.8352,
+      "layer": "L2_SIMILARITY",
+      "rationale": "Amount ties to the cent (-$560.25). Counterparty 'ONYX FACILITIES PVT' matched to 'Onyx Facilities Pvt Ltd' at 1.00; settled 6d after the document date. Crosses the month boundary - accrual cut-off applies.",
+      "evidence": {
+        "amount_exact": true,
+        "counterparty_score": 1.0,
+        "date_lag_days": 6,
+        "date_score": 0.301,
+        "reference_score": 0.0
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0022",
+      "settlement_ids": [
+        "BANK-5018"
+      ],
+      "ledger_ids": [
+        "BILL-3018"
+      ],
+      "confidence": 0.8201,
+      "layer": "L2_SIMILARITY",
+      "rationale": "Amount ties to the cent (-$4,820.00). Counterparty 'CIRRUS CLD SERVICES' matched to 'Cirrus Cloud Services' at 0.98; settled 6d after the document date. Crosses the month boundary - accrual cut-off applies.",
+      "evidence": {
+        "amount_exact": true,
+        "counterparty_score": 0.981,
+        "date_lag_days": 6,
+        "date_score": 0.301,
+        "reference_score": 0.0
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0024",
+      "settlement_ids": [
+        "BANK-5038"
+      ],
+      "ledger_ids": [
+        "BILL-3051"
+      ],
+      "confidence": 0.93,
+      "layer": "L3_AGENTIC",
+      "rationale": "Document is tax-exclusive at $5,400.00; settlement of $6,426.00 is explained by 19.0% DE_VAT (consistent with the jurisdiction on the document). Recoverable input tax of $1,026.00 should be posted to the tax control account.",
+      "evidence": {
+        "tax": {
+          "ok": true,
+          "jurisdiction": "DE_VAT",
+          "rate_pct": 19.0,
+          "tax": 102600
+        },
+        "declared_jurisdiction": "DE_VAT",
+        "competing_candidates": 0
+      },
+      "residual": 0,
+      "tools_used": [
+        "infer_tax_gross"
+      ]
+    },
+    {
+      "match_id": "M-0025",
+      "settlement_ids": [
+        "BANK-5025"
+      ],
+      "ledger_ids": [
+        "BILL-3025"
+      ],
+      "confidence": 0.92,
+      "layer": "L3_AGENTIC",
+      "rationale": "\u20ac1,000.00 converted at 1.0842 (fx_curve[EUR/USD][2026-03]) = $1,084.20; the remaining $30.00 is an unbooked wire out intl low charge. Post the fee to bank charges, not to the vendor.",
+      "evidence": {
+        "fx": {
+          "ok": true,
+          "converted": -108420,
+          "rate": 1.0842,
+          "source": "fx_curve[EUR/USD][2026-03]"
+        },
+        "fee": {
+          "ok": true,
+          "fee_model": "WIRE_OUT_INTL_LOW",
+          "fee": 3000
+        }
+      },
+      "residual": 0,
+      "tools_used": [
+        "fx_convert",
+        "fee_explains"
+      ]
+    },
+    {
+      "match_id": "M-0026",
+      "settlement_ids": [
+        "BANK-5028"
+      ],
+      "ledger_ids": [
+        "BILL-3029",
+        "BILL-3030",
+        "BILL-3028"
+      ],
+      "confidence": 0.9,
+      "layer": "L3_AGENTIC",
+      "rationale": "Single settlement of $6,116.00 is a batch remittance covering 3 documents: BILL-3029 -$2,750.50, BILL-3030 -$615.00, BILL-3028 -$2,750.50. Searched C(4,3) same-counterparty combinations; this is the only subset that closes.",
+      "evidence": {
+        "subset_sum": {
+          "ok": true,
+          "ids": [
+            "BILL-3029",
+            "BILL-3030",
+            "BILL-3028"
+          ],
+          "sum": -611600,
+          "terms": 3,
+          "residual": 0,
+          "date_cost": 23,
+          "searched": "C(4,3)"
+        },
+        "credit_note_applied": false
+      },
+      "residual": 0,
+      "tools_used": [
+        "subset_sum"
+      ]
+    },
+    {
+      "match_id": "M-0027",
+      "settlement_ids": [
+        "STP-8003"
+      ],
+      "ledger_ids": [
+        "INV-1003"
+      ],
+      "confidence": 0.93,
+      "layer": "L3_AGENTIC",
+      "rationale": "Gross $3,250.40 settled net at $3,155.84; the $94.56 difference is exactly the stripe standard schedule. Revenue is recognised gross, the fee is an expense - netting it would understate both.",
+      "evidence": {
+        "fee": {
+          "ok": true,
+          "fee_model": "STRIPE_STANDARD",
+          "fee": 9456
+        },
+        "gross": 325040,
+        "net": 315584
+      },
+      "residual": 0,
+      "tools_used": [
+        "fee_explains"
+      ]
+    },
+    {
+      "match_id": "M-0028",
+      "settlement_ids": [
+        "BANK-5036"
+      ],
+      "ledger_ids": [
+        "BILL-3049"
+      ],
+      "confidence": 0.93,
+      "layer": "L3_AGENTIC",
+      "rationale": "Document is tax-exclusive at $2,300.00; settlement of $2,760.00 is explained by 20.0% UK_VAT (consistent with the jurisdiction on the document). Recoverable input tax of $460.00 should be posted to the tax control account.",
+      "evidence": {
+        "tax": {
+          "ok": true,
+          "jurisdiction": "UK_VAT",
+          "rate_pct": 20.0,
+          "tax": 46000
+        },
+        "declared_jurisdiction": "UK_VAT",
+        "competing_candidates": 0
+      },
+      "residual": 0,
+      "tools_used": [
+        "infer_tax_gross"
+      ]
+    },
+    {
+      "match_id": "M-0029",
+      "settlement_ids": [
+        "BANK-5037"
+      ],
+      "ledger_ids": [
+        "BILL-3050"
+      ],
+      "confidence": 0.93,
+      "layer": "L3_AGENTIC",
+      "rationale": "Document is tax-exclusive at $1,200.00; settlement of $1,416.00 is explained by 18.0% IN_GST (consistent with the jurisdiction on the document). Recoverable input tax of $216.00 should be posted to the tax control account.",
+      "evidence": {
+        "tax": {
+          "ok": true,
+          "jurisdiction": "IN_GST",
+          "rate_pct": 18.0,
+          "tax": 21600
+        },
+        "declared_jurisdiction": "IN_GST",
+        "competing_candidates": 0
+      },
+      "residual": 0,
+      "tools_used": [
+        "infer_tax_gross"
+      ]
+    },
+    {
+      "match_id": "M-0031",
+      "settlement_ids": [
+        "BANK-5032"
+      ],
+      "ledger_ids": [
+        "BILL-3043",
+        "BILL-3042"
+      ],
+      "confidence": 0.88,
+      "layer": "L3_AGENTIC",
+      "rationale": "Single settlement of $6,000.00 is a short-payment net of an open credit note covering 2 documents: BILL-3043 $200.00, BILL-3042 -$6,200.00. Searched C(4,2) same-counterparty combinations; this is the only subset that closes.",
+      "evidence": {
+        "subset_sum": {
+          "ok": true,
+          "ids": [
+            "BILL-3043",
+            "BILL-3042"
+          ],
+          "sum": -600000,
+          "terms": 2,
+          "residual": 0,
+          "date_cost": 10,
+          "searched": "C(4,2)"
+        },
+        "credit_note_applied": true
+      },
+      "residual": 0,
+      "tools_used": [
+        "subset_sum"
+      ]
+    },
+    {
+      "match_id": "M-0032",
+      "settlement_ids": [
+        "STP-8005"
+      ],
+      "ledger_ids": [
+        "INV-1005"
+      ],
+      "confidence": 0.93,
+      "layer": "L3_AGENTIC",
+      "rationale": "Gross $2,400.00 settled net at $2,330.10; the $69.90 difference is exactly the stripe standard schedule. Revenue is recognised gross, the fee is an expense - netting it would understate both.",
+      "evidence": {
+        "fee": {
+          "ok": true,
+          "fee_model": "STRIPE_STANDARD",
+          "fee": 6990
+        },
+        "gross": 240000,
+        "net": 233010
+      },
+      "residual": 0,
+      "tools_used": [
+        "fee_explains"
+      ]
+    },
+    {
+      "match_id": "M-0033",
+      "settlement_ids": [
+        "BANK-5026"
+      ],
+      "ledger_ids": [
+        "BILL-3026"
+      ],
+      "confidence": 0.92,
+      "layer": "L3_AGENTIC",
+      "rationale": "\u20b988,000.00 converted at 0.01201 (fx_curve[INR/USD][2026-03]) = $1,056.88; the remaining $15.00 is an unbooked wire out domestic charge. Post the fee to bank charges, not to the vendor.",
+      "evidence": {
+        "fx": {
+          "ok": true,
+          "converted": -105688,
+          "rate": 0.01201,
+          "source": "fx_curve[INR/USD][2026-03]"
+        },
+        "fee": {
+          "ok": true,
+          "fee_model": "WIRE_OUT_DOMESTIC",
+          "fee": 1500
+        }
+      },
+      "residual": 0,
+      "tools_used": [
+        "fx_convert",
+        "fee_explains"
+      ]
+    },
+    {
+      "match_id": "M-0035",
+      "settlement_ids": [
+        "BANK-5033"
+      ],
+      "ledger_ids": [
+        "BILL-3045",
+        "BILL-3044"
+      ],
+      "confidence": 0.88,
+      "layer": "L3_AGENTIC",
+      "rationale": "Single settlement of $3,200.00 is a short-payment net of an open credit note covering 2 documents: BILL-3045 $200.00, BILL-3044 -$3,400.00. Searched C(4,2) same-counterparty combinations; this is the only subset that closes.",
+      "evidence": {
+        "subset_sum": {
+          "ok": true,
+          "ids": [
+            "BILL-3045",
+            "BILL-3044"
+          ],
+          "sum": -320000,
+          "terms": 2,
+          "residual": 0,
+          "date_cost": 10,
+          "searched": "C(4,2)"
+        },
+        "credit_note_applied": true
+      },
+      "residual": 0,
+      "tools_used": [
+        "subset_sum"
+      ]
+    },
+    {
+      "match_id": "M-0036",
+      "settlement_ids": [
+        "BANK-5034"
+      ],
+      "ledger_ids": [
+        "BILL-3047",
+        "BILL-3046"
+      ],
+      "confidence": 0.88,
+      "layer": "L3_AGENTIC",
+      "rationale": "Single settlement of $5,749.50 is a short-payment net of an open credit note covering 2 documents: BILL-3047 $450.50, BILL-3046 -$6,200.00. Searched C(3,2) same-counterparty combinations; this is the only subset that closes.",
+      "evidence": {
+        "subset_sum": {
+          "ok": true,
+          "ids": [
+            "BILL-3047",
+            "BILL-3046"
+          ],
+          "sum": -574950,
+          "terms": 2,
+          "residual": 0,
+          "date_cost": 10,
+          "searched": "C(3,2)"
+        },
+        "credit_note_applied": true
+      },
+      "residual": 0,
+      "tools_used": [
+        "subset_sum"
+      ]
+    },
+    {
+      "match_id": "M-0037",
+      "settlement_ids": [
+        "BANK-5029"
+      ],
+      "ledger_ids": [
+        "BILL-3033",
+        "BILL-3031",
+        "BILL-3032"
+      ],
+      "confidence": 0.9,
+      "layer": "L3_AGENTIC",
+      "rationale": "Single settlement of $7,300.25 is a batch remittance covering 3 documents: BILL-3033 -$1,500.00, BILL-3031 -$1,500.00, BILL-3032 -$4,300.25. Searched C(3,3) same-counterparty combinations; this is the only subset that closes.",
+      "evidence": {
+        "subset_sum": {
+          "ok": true,
+          "ids": [
+            "BILL-3033",
+            "BILL-3031",
+            "BILL-3032"
+          ],
+          "sum": -730025,
+          "terms": 3,
+          "residual": 0,
+          "date_cost": 8,
+          "searched": "C(3,3)"
+        },
+        "credit_note_applied": false
+      },
+      "residual": 0,
+      "tools_used": [
+        "subset_sum"
+      ]
+    },
+    {
+      "match_id": "M-0038",
+      "settlement_ids": [
+        "BANK-5023"
+      ],
+      "ledger_ids": [
+        "BILL-3023"
+      ],
+      "confidence": 0.92,
+      "layer": "L3_AGENTIC",
+      "rationale": "\u20ac1,800.00 converted at 1.0842 (fx_curve[EUR/USD][2026-03]) = $1,951.56; the remaining $15.00 is an unbooked wire out domestic charge. Post the fee to bank charges, not to the vendor.",
+      "evidence": {
+        "fx": {
+          "ok": true,
+          "converted": -195156,
+          "rate": 1.0842,
+          "source": "fx_curve[EUR/USD][2026-03]"
+        },
+        "fee": {
+          "ok": true,
+          "fee_model": "WIRE_OUT_DOMESTIC",
+          "fee": 1500
+        }
+      },
+      "residual": 0,
+      "tools_used": [
+        "fx_convert",
+        "fee_explains"
+      ]
+    },
+    {
+      "match_id": "M-0039",
+      "settlement_ids": [
+        "BANK-5035"
+      ],
+      "ledger_ids": [
+        "BILL-3048"
+      ],
+      "confidence": 0.93,
+      "layer": "L3_AGENTIC",
+      "rationale": "Document is tax-exclusive at $1,200.00; settlement of $1,416.00 is explained by 18.0% IN_GST (consistent with the jurisdiction on the document). Recoverable input tax of $216.00 should be posted to the tax control account.",
+      "evidence": {
+        "tax": {
+          "ok": true,
+          "jurisdiction": "IN_GST",
+          "rate_pct": 18.0,
+          "tax": 21600
+        },
+        "declared_jurisdiction": "IN_GST",
+        "competing_candidates": 0
+      },
+      "residual": 0,
+      "tools_used": [
+        "infer_tax_gross"
+      ]
+    },
+    {
+      "match_id": "M-0040",
+      "settlement_ids": [
+        "STP-8004"
+      ],
+      "ledger_ids": [
+        "INV-1004"
+      ],
+      "confidence": 0.93,
+      "layer": "L3_AGENTIC",
+      "rationale": "Gross $3,250.40 settled net at $3,155.84; the $94.56 difference is exactly the stripe standard schedule. Revenue is recognised gross, the fee is an expense - netting it would understate both.",
+      "evidence": {
+        "fee": {
+          "ok": true,
+          "fee_model": "STRIPE_STANDARD",
+          "fee": 9456
+        },
+        "gross": 325040,
+        "net": 315584
+      },
+      "residual": 0,
+      "tools_used": [
+        "fee_explains"
+      ]
+    },
+    {
+      "match_id": "M-0041",
+      "settlement_ids": [
+        "STP-8001"
+      ],
+      "ledger_ids": [
+        "INV-1001"
+      ],
+      "confidence": 0.93,
+      "layer": "L3_AGENTIC",
+      "rationale": "Gross $640.00 settled net at $621.14; the $18.86 difference is exactly the stripe standard schedule. Revenue is recognised gross, the fee is an expense - netting it would understate both.",
+      "evidence": {
+        "fee": {
+          "ok": true,
+          "fee_model": "STRIPE_STANDARD",
+          "fee": 1886
+        },
+        "gross": 64000,
+        "net": 62114
+      },
+      "residual": 0,
+      "tools_used": [
+        "fee_explains"
+      ]
+    },
+    {
+      "match_id": "M-0042",
+      "settlement_ids": [
+        "STP-8002"
+      ],
+      "ledger_ids": [
+        "INV-1002"
+      ],
+      "confidence": 0.93,
+      "layer": "L3_AGENTIC",
+      "rationale": "Gross $15,000.00 settled net at $14,564.70; the $435.30 difference is exactly the stripe standard schedule. Revenue is recognised gross, the fee is an expense - netting it would understate both.",
+      "evidence": {
+        "fee": {
+          "ok": true,
+          "fee_model": "STRIPE_STANDARD",
+          "fee": 43530
+        },
+        "gross": 1500000,
+        "net": 1456470
+      },
+      "residual": 0,
+      "tools_used": [
+        "fee_explains"
+      ]
+    },
+    {
+      "match_id": "M-0043",
+      "settlement_ids": [
+        "BANK-5027"
+      ],
+      "ledger_ids": [
+        "BILL-3027"
+      ],
+      "confidence": 0.92,
+      "layer": "L3_AGENTIC",
+      "rationale": "\u00a34,200.00 converted at 1.2673 (fx_curve[GBP/USD][2026-03]) = $5,322.66; the remaining $15.00 is an unbooked wire out domestic charge. Post the fee to bank charges, not to the vendor.",
+      "evidence": {
+        "fx": {
+          "ok": true,
+          "converted": -532266,
+          "rate": 1.2673,
+          "source": "fx_curve[GBP/USD][2026-03]"
+        },
+        "fee": {
+          "ok": true,
+          "fee_model": "WIRE_OUT_DOMESTIC",
+          "fee": 1500
+        }
+      },
+      "residual": 0,
+      "tools_used": [
+        "fx_convert",
+        "fee_explains"
+      ]
+    },
+    {
+      "match_id": "M-0044",
+      "settlement_ids": [
+        "BANK-5024"
+      ],
+      "ledger_ids": [
+        "BILL-3024"
+      ],
+      "confidence": 0.92,
+      "layer": "L3_AGENTIC",
+      "rationale": "\u00a32,500.00 converted at 1.2673 (fx_curve[GBP/USD][2026-03]) = $3,168.25; the remaining $15.00 is an unbooked wire out domestic charge. Post the fee to bank charges, not to the vendor.",
+      "evidence": {
+        "fx": {
+          "ok": true,
+          "converted": -316825,
+          "rate": 1.2673,
+          "source": "fx_curve[GBP/USD][2026-03]"
+        },
+        "fee": {
+          "ok": true,
+          "fee_model": "WIRE_OUT_DOMESTIC",
+          "fee": 1500
+        }
+      },
+      "residual": 0,
+      "tools_used": [
+        "fx_convert",
+        "fee_explains"
+      ]
+    }
+  ],
+  "held": [
+    {
+      "match_id": "M-0018",
+      "settlement_ids": [
+        "BANK-5022"
+      ],
+      "ledger_ids": [
+        "BILL-3022"
+      ],
+      "confidence": 0.8452,
+      "layer": "L2_SIMILARITY",
+      "rationale": "Amount ties to the cent (-$7,350.00). Counterparty 'ACME LOGISTIC' matched to 'Acme Logistics LLC' at 0.98; settled 4d after the document date.",
+      "evidence": {
+        "amount_exact": true,
+        "counterparty_score": 0.985,
+        "date_lag_days": 4,
+        "date_score": 0.449,
+        "reference_score": 0.0
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0019",
+      "settlement_ids": [
+        "BANK-5017"
+      ],
+      "ledger_ids": [
+        "BILL-3017"
+      ],
+      "confidence": 0.8452,
+      "layer": "L2_SIMILARITY",
+      "rationale": "Amount ties to the cent (-$7,350.00). Counterparty 'BLUEBOTTLE COFFEE' matched to 'Blue Bottle Coffee Inc' at 1.00; settled 5d after the document date. Crosses the month boundary - accrual cut-off applies.",
+      "evidence": {
+        "amount_exact": true,
+        "counterparty_score": 1.0,
+        "date_lag_days": 5,
+        "date_score": 0.368,
+        "reference_score": 0.0
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0023",
+      "settlement_ids": [
+        "BANK-5021"
+      ],
+      "ledger_ids": [
+        "BILL-3021"
+      ],
+      "confidence": 0.8051,
+      "layer": "L2_SIMILARITY",
+      "rationale": "Amount ties to the cent (-$7,350.00). Counterparty 'CIRRUS CLOUD SVCS' matched to 'Cirrus Cloud Services' at 0.96; settled 6d after the document date. Crosses the month boundary - accrual cut-off applies.",
+      "evidence": {
+        "amount_exact": true,
+        "counterparty_score": 0.962,
+        "date_lag_days": 6,
+        "date_score": 0.301,
+        "reference_score": 0.0
+      },
+      "residual": 0,
+      "tools_used": []
+    },
+    {
+      "match_id": "M-0030",
+      "settlement_ids": [
+        "BANK-5031"
+      ],
+      "ledger_ids": [
+        "BILL-3041",
+        "BILL-3038",
+        "BILL-3039",
+        "BILL-3040"
+      ],
+      "confidence": 0.86,
+      "layer": "L3_AGENTIC",
+      "rationale": "Single settlement of $7,030.25 is a batch remittance covering 4 documents: BILL-3041 -$615.00, BILL-3038 -$1,500.00, BILL-3039 -$4,300.25, BILL-3040 -$615.00. Searched C(7,4) same-counterparty combinations; this is the only subset that closes.",
+      "evidence": {
+        "subset_sum": {
+          "ok": true,
+          "ids": [
+            "BILL-3041",
+            "BILL-3038",
+            "BILL-3039",
+            "BILL-3040"
+          ],
+          "sum": -703025,
+          "terms": 4,
+          "residual": 0,
+          "date_cost": 25,
+          "searched": "C(7,4)"
+        },
+        "credit_note_applied": false
+      },
+      "residual": 0,
+      "tools_used": [
+        "subset_sum"
+      ]
+    },
+    {
+      "match_id": "M-0034",
+      "settlement_ids": [
+        "BANK-5030"
+      ],
+      "ledger_ids": [
+        "BILL-3036",
+        "BILL-3034",
+        "BILL-3035",
+        "BILL-3037"
+      ],
+      "confidence": 0.86,
+      "layer": "L3_AGENTIC",
+      "rationale": "Single settlement of $8,655.75 is a batch remittance covering 4 documents: BILL-3036 -$2,750.50, BILL-3034 -$990.00, BILL-3035 -$615.00, BILL-3037 -$4,300.25. Searched C(6,4) same-counterparty combinations; this is the only subset that closes.",
+      "evidence": {
+        "subset_sum": {
+          "ok": true,
+          "ids": [
+            "BILL-3036",
+            "BILL-3034",
+            "BILL-3035",
+            "BILL-3037"
+          ],
+          "sum": -865575,
+          "terms": 4,
+          "residual": 0,
+          "date_cost": 14,
+          "searched": "C(6,4)"
+        },
+        "credit_note_applied": false
+      },
+      "residual": 0,
+      "tools_used": [
+        "subset_sum"
+      ]
+    }
+  ],
+  "exceptions": [
+    {
+      "record_ids": [
+        "BANK-5022",
+        "BILL-3022"
+      ],
+      "category": "POLICY_HOLD",
+      "severity": "MEDIUM",
+      "reason": "Resolved at L2_SIMILARITY but held: material item $7,350.00 at confidence 0.85 requires >= 0.88",
+      "suggested_action": "Controller review; approve to book as proposed.",
+      "amount": -735000,
+      "currency": "USD",
+      "evidence": {
+        "proposed": {
+          "match_id": "M-0018",
+          "settlement_ids": [
+            "BANK-5022"
+          ],
+          "ledger_ids": [
+            "BILL-3022"
+          ],
+          "confidence": 0.8452,
+          "layer": "L2_SIMILARITY",
+          "rationale": "Amount ties to the cent (-$7,350.00). Counterparty 'ACME LOGISTIC' matched to 'Acme Logistics LLC' at 0.98; settled 4d after the document date.",
+          "evidence": {
+            "amount_exact": true,
+            "counterparty_score": 0.985,
+            "date_lag_days": 4,
+            "date_score": 0.449,
+            "reference_score": 0.0
+          },
+          "residual": 0,
+          "tools_used": []
+        }
+      }
+    },
+    {
+      "record_ids": [
+        "BANK-5017",
+        "BILL-3017"
+      ],
+      "category": "POLICY_HOLD",
+      "severity": "MEDIUM",
+      "reason": "Resolved at L2_SIMILARITY but held: material item $7,350.00 at confidence 0.85 requires >= 0.88",
+      "suggested_action": "Controller review; approve to book as proposed.",
+      "amount": -735000,
+      "currency": "USD",
+      "evidence": {
+        "proposed": {
+          "match_id": "M-0019",
+          "settlement_ids": [
+            "BANK-5017"
+          ],
+          "ledger_ids": [
+            "BILL-3017"
+          ],
+          "confidence": 0.8452,
+          "layer": "L2_SIMILARITY",
+          "rationale": "Amount ties to the cent (-$7,350.00). Counterparty 'BLUEBOTTLE COFFEE' matched to 'Blue Bottle Coffee Inc' at 1.00; settled 5d after the document date. Crosses the month boundary - accrual cut-off applies.",
+          "evidence": {
+            "amount_exact": true,
+            "counterparty_score": 1.0,
+            "date_lag_days": 5,
+            "date_score": 0.368,
+            "reference_score": 0.0
+          },
+          "residual": 0,
+          "tools_used": []
+        }
+      }
+    },
+    {
+      "record_ids": [
+        "BANK-5021",
+        "BILL-3021"
+      ],
+      "category": "POLICY_HOLD",
+      "severity": "MEDIUM",
+      "reason": "Resolved at L2_SIMILARITY but held: material item $7,350.00 at confidence 0.81 requires >= 0.88",
+      "suggested_action": "Controller review; approve to book as proposed.",
+      "amount": -735000,
+      "currency": "USD",
+      "evidence": {
+        "proposed": {
+          "match_id": "M-0023",
+          "settlement_ids": [
+            "BANK-5021"
+          ],
+          "ledger_ids": [
+            "BILL-3021"
+          ],
+          "confidence": 0.8051,
+          "layer": "L2_SIMILARITY",
+          "rationale": "Amount ties to the cent (-$7,350.00). Counterparty 'CIRRUS CLOUD SVCS' matched to 'Cirrus Cloud Services' at 0.96; settled 6d after the document date. Crosses the month boundary - accrual cut-off applies.",
+          "evidence": {
+            "amount_exact": true,
+            "counterparty_score": 0.962,
+            "date_lag_days": 6,
+            "date_score": 0.301,
+            "reference_score": 0.0
+          },
+          "residual": 0,
+          "tools_used": []
+        }
+      }
+    },
+    {
+      "record_ids": [
+        "BANK-5031",
+        "BILL-3041",
+        "BILL-3038",
+        "BILL-3039",
+        "BILL-3040"
+      ],
+      "category": "POLICY_HOLD",
+      "severity": "MEDIUM",
+      "reason": "Resolved at L3_AGENTIC but held: material item $7,030.25 at confidence 0.86 requires >= 0.88",
+      "suggested_action": "Controller review; approve to book as proposed.",
+      "amount": -703025,
+      "currency": "USD",
+      "evidence": {
+        "proposed": {
+          "match_id": "M-0030",
+          "settlement_ids": [
+            "BANK-5031"
+          ],
+          "ledger_ids": [
+            "BILL-3041",
+            "BILL-3038",
+            "BILL-3039",
+            "BILL-3040"
+          ],
+          "confidence": 0.86,
+          "layer": "L3_AGENTIC",
+          "rationale": "Single settlement of $7,030.25 is a batch remittance covering 4 documents: BILL-3041 -$615.00, BILL-3038 -$1,500.00, BILL-3039 -$4,300.25, BILL-3040 -$615.00. Searched C(7,4) same-counterparty combinations; this is the only subset that closes.",
+          "evidence": {
+            "subset_sum": {
+              "ok": true,
+              "ids": [
+                "BILL-3041",
+                "BILL-3038",
+                "BILL-3039",
+                "BILL-3040"
+              ],
+              "sum": -703025,
+              "terms": 4,
+              "residual": 0,
+              "date_cost": 25,
+              "searched": "C(7,4)"
+            },
+            "credit_note_applied": false
+          },
+          "residual": 0,
+          "tools_used": [
+            "subset_sum"
+          ]
+        }
+      }
+    },
+    {
+      "record_ids": [
+        "BANK-5040"
+      ],
+      "category": "UNIDENTIFIED_OUTFLOW",
+      "severity": "HIGH",
+      "reason": "$318.44 settled on 2026-03-14 as 'CARD 4471 UNKNOWN MERCHANT SVC', but no open ledger document resembles this counterparty above the 0.80 identity threshold.",
+      "suggested_action": "Investigate against card/vendor master; possible unrecorded expense or unauthorised debit.",
+      "amount": -31844,
+      "currency": "USD",
+      "evidence": {
+        "description": "CARD 4471 UNKNOWN MERCHANT SVC"
+      }
+    },
+    {
+      "record_ids": [
+        "BANK-5030",
+        "BILL-3036",
+        "BILL-3034",
+        "BILL-3035",
+        "BILL-3037"
+      ],
+      "category": "POLICY_HOLD",
+      "severity": "MEDIUM",
+      "reason": "Resolved at L3_AGENTIC but held: material item $8,655.75 at confidence 0.86 requires >= 0.88",
+      "suggested_action": "Controller review; approve to book as proposed.",
+      "amount": -865575,
+      "currency": "USD",
+      "evidence": {
+        "proposed": {
+          "match_id": "M-0034",
+          "settlement_ids": [
+            "BANK-5030"
+          ],
+          "ledger_ids": [
+            "BILL-3036",
+            "BILL-3034",
+            "BILL-3035",
+            "BILL-3037"
+          ],
+          "confidence": 0.86,
+          "layer": "L3_AGENTIC",
+          "rationale": "Single settlement of $8,655.75 is a batch remittance covering 4 documents: BILL-3036 -$2,750.50, BILL-3034 -$990.00, BILL-3035 -$615.00, BILL-3037 -$4,300.25. Searched C(6,4) same-counterparty combinations; this is the only subset that closes.",
+          "evidence": {
+            "subset_sum": {
+              "ok": true,
+              "ids": [
+                "BILL-3036",
+                "BILL-3034",
+                "BILL-3035",
+                "BILL-3037"
+              ],
+              "sum": -865575,
+              "terms": 4,
+              "residual": 0,
+              "date_cost": 14,
+              "searched": "C(6,4)"
+            },
+            "credit_note_applied": false
+          },
+          "residual": 0,
+          "tools_used": [
+            "subset_sum"
+          ]
+        }
+      }
+    },
+    {
+      "record_ids": [
+        "BANK-5042",
+        "BILL-3057"
+      ],
+      "category": "AMOUNT_VARIANCE_UNEXPLAINED",
+      "severity": "HIGH",
+      "reason": "Settlement $9,880.00 on 2026-03-17 is the closest fit to BILL-3057 ($9,800.00, 'Sable Media Group'), a variance of $80.00 (0.82%). Tested and rejected: tax, split. No FX rate, fee schedule, statutory tax rate or document subset explains the difference.",
+      "suggested_action": "Do not book. Confirm the remitted amount against the vendor statement - an unexplained overpayment is the signature of both keying error and invoice fraud.",
+      "amount": -988000,
+      "currency": "USD",
+      "evidence": {
+        "nearest_candidate": "BILL-3057",
+        "variance": 8000,
+        "variance_pct": 0.816,
+        "hypotheses_rejected": [
+          "tax",
+          "split"
+        ],
+        "other_candidates": [
+          "BILL-3057"
+        ]
+      }
+    },
+    {
+      "record_ids": [
+        "BANK-5041"
+      ],
+      "category": "UNIDENTIFIED_OUTFLOW",
+      "severity": "HIGH",
+      "reason": "$2,750.00 settled on 2026-03-25 as 'WIRE OUT REF UNAVAILABLE', but no open ledger document resembles this counterparty above the 0.80 identity threshold.",
+      "suggested_action": "Investigate against card/vendor master; possible unrecorded expense or unauthorised debit.",
+      "amount": -275000,
+      "currency": "USD",
+      "evidence": {
+        "description": "WIRE OUT REF UNAVAILABLE"
+      }
+    },
+    {
+      "record_ids": [
+        "BILL-3053"
+      ],
+      "category": "DUPLICATE_BILLING",
+      "severity": "HIGH",
+      "reason": "Reference INV-63831 for 'Meridian Print Co' exists on 2 ledger documents at -$4,500.00, but only one settlement was found. Paying both would be a $4,500.00 overpayment.",
+      "suggested_action": "Block for payment; confirm with vendor and void the duplicate.",
+      "amount": -450000,
+      "currency": "USD",
+      "evidence": {
+        "sibling_ids": [
+          "BILL-3053",
+          "BILL-3052"
+        ]
+      }
+    },
+    {
+      "record_ids": [
+        "INV-1009"
+      ],
+      "category": "OPEN_RECEIVABLE",
+      "severity": "LOW",
+      "reason": "No settlement found in the period. Document dated 2026-03-14, due 2026-04-13.",
+      "suggested_action": "Chase the counterparty; ageing bucket feeds the cash forecast.",
+      "amount": 930000,
+      "currency": "USD",
+      "evidence": {
+        "doc_type": "INVOICE",
+        "overdue": false
+      }
+    },
+    {
+      "record_ids": [
+        "BILL-3057"
+      ],
+      "category": "OPEN_PAYABLE",
+      "severity": "LOW",
+      "reason": "No settlement found in the period. Document dated 2026-03-16, due 2026-04-15.",
+      "suggested_action": "Chase the counterparty; ageing bucket feeds the cash forecast.",
+      "amount": -980000,
+      "currency": "USD",
+      "evidence": {
+        "doc_type": "BILL",
+        "overdue": false
+      }
+    },
+    {
+      "record_ids": [
+        "INV-1006"
+      ],
+      "category": "OPEN_RECEIVABLE",
+      "severity": "LOW",
+      "reason": "No settlement found in the period. Document dated 2026-03-19, due 2026-05-03.",
+      "suggested_action": "Chase the counterparty; ageing bucket feeds the cash forecast.",
+      "amount": 2650000,
+      "currency": "USD",
+      "evidence": {
+        "doc_type": "INVOICE",
+        "overdue": false
+      }
+    },
+    {
+      "record_ids": [
+        "INV-1010"
+      ],
+      "category": "OPEN_RECEIVABLE",
+      "severity": "LOW",
+      "reason": "No settlement found in the period. Document dated 2026-03-20, due 2026-04-19.",
+      "suggested_action": "Chase the counterparty; ageing bucket feeds the cash forecast.",
+      "amount": 1575000,
+      "currency": "USD",
+      "evidence": {
+        "doc_type": "INVOICE",
+        "overdue": false
+      }
+    },
+    {
+      "record_ids": [
+        "BILL-3055"
+      ],
+      "category": "OPEN_PAYABLE",
+      "severity": "LOW",
+      "reason": "No settlement found in the period. Document dated 2026-03-22, due 2026-05-06.",
+      "suggested_action": "Chase the counterparty; ageing bucket feeds the cash forecast.",
+      "amount": -520000,
+      "currency": "USD",
+      "evidence": {
+        "doc_type": "BILL",
+        "overdue": false
+      }
+    },
+    {
+      "record_ids": [
+        "INV-1007"
+      ],
+      "category": "OPEN_RECEIVABLE",
+      "severity": "LOW",
+      "reason": "No settlement found in the period. Document dated 2026-03-25, due 2026-04-24.",
+      "suggested_action": "Chase the counterparty; ageing bucket feeds the cash forecast.",
+      "amount": 1200000,
+      "currency": "USD",
+      "evidence": {
+        "doc_type": "INVOICE",
+        "overdue": false
+      }
+    },
+    {
+      "record_ids": [
+        "INV-1008"
+      ],
+      "category": "OPEN_RECEIVABLE",
+      "severity": "LOW",
+      "reason": "No settlement found in the period. Document dated 2026-03-25, due 2026-04-24.",
+      "suggested_action": "Chase the counterparty; ageing bucket feeds the cash forecast.",
+      "amount": 480000,
+      "currency": "USD",
+      "evidence": {
+        "doc_type": "INVOICE",
+        "overdue": false
+      }
+    },
+    {
+      "record_ids": [
+        "BILL-3054"
+      ],
+      "category": "OPEN_PAYABLE",
+      "severity": "LOW",
+      "reason": "No settlement found in the period. Document dated 2026-03-26, due 2026-05-10.",
+      "suggested_action": "Chase the counterparty; ageing bucket feeds the cash forecast.",
+      "amount": -520000,
+      "currency": "USD",
+      "evidence": {
+        "doc_type": "BILL",
+        "overdue": false
+      }
+    },
+    {
+      "record_ids": [
+        "BILL-3056"
+      ],
+      "category": "OPEN_PAYABLE",
+      "severity": "LOW",
+      "reason": "No settlement found in the period. Document dated 2026-03-27, due 2026-05-11.",
+      "suggested_action": "Chase the counterparty; ageing bucket feeds the cash forecast.",
+      "amount": -145060,
+      "currency": "USD",
+      "evidence": {
+        "doc_type": "BILL",
+        "overdue": false
+      }
+    },
+    {
+      "record_ids": [
+        "INV-1011"
+      ],
+      "category": "OPEN_RECEIVABLE",
+      "severity": "LOW",
+      "reason": "No settlement found in the period. Document dated 2026-03-30, due 2026-04-29.",
+      "suggested_action": "Chase the counterparty; ageing bucket feeds the cash forecast.",
+      "amount": 1200000,
+      "currency": "USD",
+      "evidence": {
+        "doc_type": "INVOICE",
+        "overdue": false
+      }
+    }
+  ],
+  "records": [
+    {
+      "id": "BILL-3039",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-08",
+      "amount": -430025,
+      "currency": "USD",
+      "description": "Bill from Cirrus Cloud Services",
+      "counterparty": "Cirrus Cloud Services",
+      "reference": "INV-22651",
+      "due_date": "2026-04-03",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3050",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-11",
+      "amount": -120000,
+      "currency": "USD",
+      "description": "Bill from Onyx Facilities Pvt Ltd (net of tax)",
+      "counterparty": "Onyx Facilities Pvt Ltd",
+      "reference": "INV-95330",
+      "due_date": "2026-04-10",
+      "doc_type": "BILL",
+      "meta": {
+        "tax_treatment": "EXCLUSIVE",
+        "jurisdiction": "IN_GST"
+      }
+    },
+    {
+      "id": "INV-1003",
+      "source": "ERP_AR",
+      "side": "LEDGER",
+      "txn_date": "2026-03-07",
+      "amount": 325040,
+      "currency": "USD",
+      "description": "Invoice to Pallas Robotics",
+      "counterparty": "Pallas Robotics",
+      "reference": "AR-98644",
+      "due_date": "2026-03-21",
+      "doc_type": "INVOICE",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3044",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-15",
+      "amount": -340000,
+      "currency": "USD",
+      "description": "Bill from Meridian Print Co",
+      "counterparty": "Meridian Print Co",
+      "reference": "INV-97970",
+      "due_date": "2026-04-14",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3056",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-27",
+      "amount": -145060,
+      "currency": "USD",
+      "description": "Bill from Cirrus Cloud Services",
+      "counterparty": "Cirrus Cloud Services",
+      "reference": "INV-67829",
+      "due_date": "2026-05-11",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3004",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-16",
+      "amount": -125000,
+      "currency": "USD",
+      "description": "Bill from Vantage Insurance Corp",
+      "counterparty": "Vantage Insurance Corp",
+      "reference": "INV-34777",
+      "due_date": "2026-04-15",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3020",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-28",
+      "amount": -56025,
+      "currency": "USD",
+      "description": "Bill from Onyx Facilities Pvt Ltd",
+      "counterparty": "Onyx Facilities Pvt Ltd",
+      "reference": "INV-85805",
+      "due_date": "2026-04-12",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3017",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-27",
+      "amount": -735000,
+      "currency": "USD",
+      "description": "Bill from Blue Bottle Coffee Inc",
+      "counterparty": "Blue Bottle Coffee Inc",
+      "reference": "INV-15867",
+      "due_date": "2026-04-11",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3023",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-18",
+      "amount": -180000,
+      "currency": "EUR",
+      "description": "Bill from Northwind Traders GmbH",
+      "counterparty": "Northwind Traders GmbH",
+      "reference": "INV-11159",
+      "due_date": "2026-04-17",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5010",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-11",
+      "amount": -330000,
+      "currency": "USD",
+      "description": "ACH DEBIT HALBERD LEGAL LLP INV-83960",
+      "counterparty": "HALBERD L.L.P.",
+      "reference": "INV-83960",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5023",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-21",
+      "amount": -196656,
+      "currency": "USD",
+      "description": "INTL WIRE NORDWIND TRADERS FX EUR/USD",
+      "counterparty": "NORDWIND TRADERS",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3018",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-30",
+      "amount": -482000,
+      "currency": "USD",
+      "description": "Bill from Cirrus Cloud Services",
+      "counterparty": "Cirrus Cloud Services",
+      "reference": "INV-19605",
+      "due_date": "2026-04-14",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3014",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-07",
+      "amount": -64000,
+      "currency": "USD",
+      "description": "Bill from Blue Bottle Coffee Inc",
+      "counterparty": "Blue Bottle Coffee Inc",
+      "reference": "INV-29493",
+      "due_date": "2026-04-06",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "INV-1002",
+      "source": "ERP_AR",
+      "side": "LEDGER",
+      "txn_date": "2026-03-21",
+      "amount": 1500000,
+      "currency": "USD",
+      "description": "Invoice to Redwood Health Systems",
+      "counterparty": "Redwood Health Systems",
+      "reference": "AR-97757",
+      "due_date": "2026-04-04",
+      "doc_type": "INVOICE",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3025",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-05",
+      "amount": -100000,
+      "currency": "EUR",
+      "description": "Bill from Northwind Traders GmbH",
+      "counterparty": "Northwind Traders GmbH",
+      "reference": "INV-75864",
+      "due_date": "2026-04-04",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3024",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-26",
+      "amount": -250000,
+      "currency": "GBP",
+      "description": "Bill from Kestrel Analytics Ltd",
+      "counterparty": "Kestrel Analytics Ltd",
+      "reference": "INV-56151",
+      "due_date": "2026-04-25",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5024",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-27",
+      "amount": -318325,
+      "currency": "USD",
+      "description": "INTL WIRE KSTRL ANALYTICS UK FX GBP/USD",
+      "counterparty": "KSTRL ANALYTICS UK",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3040",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-11",
+      "amount": -61500,
+      "currency": "USD",
+      "description": "Bill from Cirrus Cloud Services",
+      "counterparty": "Cirrus Cloud Services",
+      "reference": "INV-39242",
+      "due_date": "2026-04-03",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3006",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-12",
+      "amount": -125000,
+      "currency": "USD",
+      "description": "Bill from Northwind Traders GmbH",
+      "counterparty": "Northwind Traders GmbH",
+      "reference": "INV-33966",
+      "due_date": "2026-04-11",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5015",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-18",
+      "amount": -64000,
+      "currency": "USD",
+      "description": "ACH DEBIT NORTHWIND TRADERS GMBH INV-66690",
+      "counterparty": "NW TRADERS EU",
+      "reference": "INV-66690",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5042",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-17",
+      "amount": -988000,
+      "currency": "USD",
+      "description": "ACH DEBIT SABLE MEDIA GRP",
+      "counterparty": "SABLE MEDIA GRP",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5005",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-05",
+      "amount": -77510,
+      "currency": "USD",
+      "description": "ACH DEBIT SABLE MEDIA GROUP INV-49453",
+      "counterparty": "SABLE MEDIA GROUP",
+      "reference": "INV-49453",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3042",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-12",
+      "amount": -620000,
+      "currency": "USD",
+      "description": "Bill from Kestrel Analytics Ltd",
+      "counterparty": "Kestrel Analytics Ltd",
+      "reference": "INV-77776",
+      "due_date": "2026-04-11",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3009",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-06",
+      "amount": -77510,
+      "currency": "USD",
+      "description": "Bill from Onyx Facilities Pvt Ltd",
+      "counterparty": "Onyx Facilities Pvt Ltd",
+      "reference": "INV-41002",
+      "due_date": "2026-04-05",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3046",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-16",
+      "amount": -620000,
+      "currency": "USD",
+      "description": "Bill from Cirrus Cloud Services",
+      "counterparty": "Cirrus Cloud Services",
+      "reference": "INV-95810",
+      "due_date": "2026-04-15",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3053",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-11",
+      "amount": -450000,
+      "currency": "USD",
+      "description": "Bill from Meridian Print Co",
+      "counterparty": "Meridian Print Co",
+      "reference": "INV-63831",
+      "due_date": "2026-04-10",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "INV-1004",
+      "source": "ERP_AR",
+      "side": "LEDGER",
+      "txn_date": "2026-03-20",
+      "amount": 325040,
+      "currency": "USD",
+      "description": "Invoice to Juniper Foods Ltd",
+      "counterparty": "Juniper Foods Ltd",
+      "reference": "AR-44276",
+      "due_date": "2026-04-03",
+      "doc_type": "INVOICE",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5014",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-07",
+      "amount": -64000,
+      "currency": "USD",
+      "description": "ACH DEBIT BLUEBOTTLE COFFEE INV-29493",
+      "counterparty": "SQ *BLUE BOTTLE 4471",
+      "reference": "INV-29493",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5006",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-13",
+      "amount": -125000,
+      "currency": "USD",
+      "description": "ACH DEBIT NW TRADERS EU INV-33966",
+      "counterparty": "NW TRADERS EU",
+      "reference": "INV-33966",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5037",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-12",
+      "amount": -141600,
+      "currency": "USD",
+      "description": "ACH DEBIT ONYX FAC IN INCL TAX",
+      "counterparty": "ONYX FACILITIES PVT",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3022",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-27",
+      "amount": -735000,
+      "currency": "USD",
+      "description": "Bill from Acme Logistics LLC",
+      "counterparty": "Acme Logistics LLC",
+      "reference": "INV-71246",
+      "due_date": "2026-04-11",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "STP-8005",
+      "source": "STRIPE",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-14",
+      "amount": 233010,
+      "currency": "USD",
+      "description": "STRIPE PAYOUT net of fees ch_8522328601",
+      "counterparty": "Lumen Retail Group",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "CHARGE",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5030",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-16",
+      "amount": -865575,
+      "currency": "USD",
+      "description": "ACH BATCH PMT NW TRADERS EU 4 INV",
+      "counterparty": "NW TRADERS EU",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5029",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-19",
+      "amount": -730025,
+      "currency": "USD",
+      "description": "ACH BATCH PMT ACMELOGISTICS ACH 3 INV",
+      "counterparty": "ACME LOGISTICS L.L.C.",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3049",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-09",
+      "amount": -230000,
+      "currency": "USD",
+      "description": "Bill from Onyx Facilities Pvt Ltd (net of tax)",
+      "counterparty": "Onyx Facilities Pvt Ltd",
+      "reference": "INV-94799",
+      "due_date": "2026-04-08",
+      "doc_type": "BILL",
+      "meta": {
+        "tax_treatment": "EXCLUSIVE",
+        "jurisdiction": "UK_VAT"
+      }
+    },
+    {
+      "id": "BILL-3028",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-03",
+      "amount": -275050,
+      "currency": "USD",
+      "description": "Bill from Blue Bottle Coffee Inc",
+      "counterparty": "Blue Bottle Coffee Inc",
+      "reference": "INV-34653",
+      "due_date": "2026-03-29",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3015",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-18",
+      "amount": -64000,
+      "currency": "USD",
+      "description": "Bill from Northwind Traders GmbH",
+      "counterparty": "Northwind Traders GmbH",
+      "reference": "INV-66690",
+      "due_date": "2026-04-17",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3012",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-19",
+      "amount": -330000,
+      "currency": "USD",
+      "description": "Bill from Onyx Facilities Pvt Ltd",
+      "counterparty": "Onyx Facilities Pvt Ltd",
+      "reference": "INV-35979",
+      "due_date": "2026-04-18",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "INV-1009",
+      "source": "ERP_AR",
+      "side": "LEDGER",
+      "txn_date": "2026-03-14",
+      "amount": 930000,
+      "currency": "USD",
+      "description": "Invoice to Juniper Foods Ltd",
+      "counterparty": "Juniper Foods Ltd",
+      "reference": "AR-29651",
+      "due_date": "2026-04-13",
+      "doc_type": "INVOICE",
+      "meta": {
+        "open": true
+      }
+    },
+    {
+      "id": "BANK-5036",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-10",
+      "amount": -276000,
+      "currency": "USD",
+      "description": "ACH DEBIT ONYX FAC IN INCL TAX",
+      "counterparty": "ONYX FACILITIES",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5035",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-22",
+      "amount": -141600,
+      "currency": "USD",
+      "description": "ACH DEBIT SQ*BLUE BOTTLE COFF INCL TAX",
+      "counterparty": "BLUEBOTTLE COFFEE",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "INV-1005",
+      "source": "ERP_AR",
+      "side": "LEDGER",
+      "txn_date": "2026-03-12",
+      "amount": 240000,
+      "currency": "USD",
+      "description": "Invoice to Lumen Retail Group",
+      "counterparty": "Lumen Retail Group",
+      "reference": "AR-11533",
+      "due_date": "2026-03-26",
+      "doc_type": "INVOICE",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5011",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-07",
+      "amount": -330000,
+      "currency": "USD",
+      "description": "ACH DEBIT CIRRUS CLD SERVICES INV-67963",
+      "counterparty": "CIRRUS CLD SERVICES",
+      "reference": "INV-67963",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3032",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-17",
+      "amount": -430025,
+      "currency": "USD",
+      "description": "Bill from Acme Logistics LLC",
+      "counterparty": "Acme Logistics LLC",
+      "reference": "INV-56461",
+      "due_date": "2026-04-08",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3035",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-13",
+      "amount": -61500,
+      "currency": "USD",
+      "description": "Bill from Northwind Traders GmbH",
+      "counterparty": "Northwind Traders GmbH",
+      "reference": "INV-22653",
+      "due_date": "2026-04-05",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3047",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-10",
+      "amount": 45050,
+      "currency": "USD",
+      "description": "Credit note from Cirrus Cloud Services",
+      "counterparty": "Cirrus Cloud Services",
+      "reference": "CN-9803",
+      "due_date": null,
+      "doc_type": "CREDIT_NOTE",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3011",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-05",
+      "amount": -330000,
+      "currency": "USD",
+      "description": "Bill from Cirrus Cloud Services",
+      "counterparty": "Cirrus Cloud Services",
+      "reference": "INV-67963",
+      "due_date": "2026-04-04",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5004",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-18",
+      "amount": -125000,
+      "currency": "USD",
+      "description": "ACH DEBIT VANTAGE INS INV-34777",
+      "counterparty": "VANTAGE INSURANCE",
+      "reference": "INV-34777",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5008",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-17",
+      "amount": -125000,
+      "currency": "USD",
+      "description": "ACH DEBIT CIRRUSCLOUD.IO INV-65981",
+      "counterparty": "CIRRUSCLOUD.IO",
+      "reference": "INV-65981",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3005",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-03",
+      "amount": -77510,
+      "currency": "USD",
+      "description": "Bill from Sable Media Group",
+      "counterparty": "Sable Media Group",
+      "reference": "INV-49453",
+      "due_date": "2026-04-02",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5002",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-05",
+      "amount": -77510,
+      "currency": "USD",
+      "description": "ACH DEBIT SABLEMEDIA INV-63236",
+      "counterparty": "SABLE MEDIA GROUP",
+      "reference": "INV-63236",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3038",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-07",
+      "amount": -150000,
+      "currency": "USD",
+      "description": "Bill from Cirrus Cloud Services",
+      "counterparty": "Cirrus Cloud Services",
+      "reference": "INV-12488",
+      "due_date": "2026-04-03",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3031",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-17",
+      "amount": -150000,
+      "currency": "USD",
+      "description": "Bill from Acme Logistics LLC",
+      "counterparty": "Acme Logistics LLC",
+      "reference": "INV-90141",
+      "due_date": "2026-04-08",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5012",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-20",
+      "amount": -330000,
+      "currency": "USD",
+      "description": "ACH DEBIT ONYX FAC IN INV-35979",
+      "counterparty": "ONYX FACILITIES",
+      "reference": "INV-35979",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3019",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-29",
+      "amount": -482000,
+      "currency": "USD",
+      "description": "Bill from Sable Media Group",
+      "counterparty": "Sable Media Group",
+      "reference": "INV-57945",
+      "due_date": "2026-04-13",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3048",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-21",
+      "amount": -120000,
+      "currency": "USD",
+      "description": "Bill from Blue Bottle Coffee Inc (net of tax)",
+      "counterparty": "Blue Bottle Coffee Inc",
+      "reference": "INV-79561",
+      "due_date": "2026-04-20",
+      "doc_type": "BILL",
+      "meta": {
+        "tax_treatment": "EXCLUSIVE",
+        "jurisdiction": "IN_GST"
+      }
+    },
+    {
+      "id": "BANK-5013",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-12",
+      "amount": -330000,
+      "currency": "USD",
+      "description": "ACH DEBIT ONYX FACILITIES INV-76207",
+      "counterparty": "ONYX FACILITIES",
+      "reference": "INV-76207",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5027",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-25",
+      "amount": -533766,
+      "currency": "USD",
+      "description": "INTL WIRE KESTREL ANALYTICS LTD FX GBP/USD",
+      "counterparty": "KESTREL ANALYTIC",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5028",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-09",
+      "amount": -611600,
+      "currency": "USD",
+      "description": "ACH BATCH PMT SQ*BLUE BOTTLE COFF 3 INV",
+      "counterparty": "BLUEBOTTLE COFFEE",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3043",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-06",
+      "amount": 20000,
+      "currency": "USD",
+      "description": "Credit note from Kestrel Analytics Ltd",
+      "counterparty": "Kestrel Analytics Ltd",
+      "reference": "CN-1662",
+      "due_date": null,
+      "doc_type": "CREDIT_NOTE",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5039",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-12",
+      "amount": -450000,
+      "currency": "USD",
+      "description": "ACH DEBIT MERIDIAN PRINTING INV-63831",
+      "counterparty": "MERIDIAN PRINTING",
+      "reference": "INV-63831",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "INV-1007",
+      "source": "ERP_AR",
+      "side": "LEDGER",
+      "txn_date": "2026-03-25",
+      "amount": 1200000,
+      "currency": "USD",
+      "description": "Invoice to Atlas Freight Co",
+      "counterparty": "Atlas Freight Co",
+      "reference": "AR-72866",
+      "due_date": "2026-04-24",
+      "doc_type": "INVOICE",
+      "meta": {
+        "open": true
+      }
+    },
+    {
+      "id": "BILL-3001",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-20",
+      "amount": -890000,
+      "currency": "USD",
+      "description": "Bill from Sable Media Group",
+      "counterparty": "Sable Media Group",
+      "reference": "INV-91398",
+      "due_date": "2026-04-19",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "INV-1011",
+      "source": "ERP_AR",
+      "side": "LEDGER",
+      "txn_date": "2026-03-30",
+      "amount": 1200000,
+      "currency": "USD",
+      "description": "Invoice to Juniper Foods Ltd",
+      "counterparty": "Juniper Foods Ltd",
+      "reference": "AR-50970",
+      "due_date": "2026-04-29",
+      "doc_type": "INVOICE",
+      "meta": {
+        "open": true
+      }
+    },
+    {
+      "id": "BANK-5019",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-04-03",
+      "amount": -482000,
+      "currency": "USD",
+      "description": "ACH DEBIT SABLE MEDIA GRP",
+      "counterparty": "SABLE MEDIA GRP",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5017",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-04-01",
+      "amount": -735000,
+      "currency": "USD",
+      "description": "ACH DEBIT SQ*BLUE BOTTLE COFF",
+      "counterparty": "BLUEBOTTLE COFFEE",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5034",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-18",
+      "amount": -574950,
+      "currency": "USD",
+      "description": "ACH DEBIT CIRRUS CLD SERVICES NET OF CN",
+      "counterparty": "CIRRUS CLOUD SVCS",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5041",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-25",
+      "amount": -275000,
+      "currency": "USD",
+      "description": "WIRE OUT REF UNAVAILABLE",
+      "counterparty": "",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3029",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-02-28",
+      "amount": -275050,
+      "currency": "USD",
+      "description": "Bill from Blue Bottle Coffee Inc",
+      "counterparty": "Blue Bottle Coffee Inc",
+      "reference": "INV-72704",
+      "due_date": "2026-03-29",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "INV-1006",
+      "source": "ERP_AR",
+      "side": "LEDGER",
+      "txn_date": "2026-03-19",
+      "amount": 2650000,
+      "currency": "USD",
+      "description": "Invoice to Pallas Robotics",
+      "counterparty": "Pallas Robotics",
+      "reference": "AR-96316",
+      "due_date": "2026-05-03",
+      "doc_type": "INVOICE",
+      "meta": {
+        "open": true
+      }
+    },
+    {
+      "id": "BILL-3037",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-13",
+      "amount": -430025,
+      "currency": "USD",
+      "description": "Bill from Northwind Traders GmbH",
+      "counterparty": "Northwind Traders GmbH",
+      "reference": "INV-89725",
+      "due_date": "2026-04-05",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3002",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-03",
+      "amount": -77510,
+      "currency": "USD",
+      "description": "Bill from Sable Media Group",
+      "counterparty": "Sable Media Group",
+      "reference": "INV-63236",
+      "due_date": "2026-04-02",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5026",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-16",
+      "amount": -107188,
+      "currency": "USD",
+      "description": "INTL WIRE ONYX FAC IN FX INR/USD",
+      "counterparty": "ONYX FACILITIES",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "INV-1010",
+      "source": "ERP_AR",
+      "side": "LEDGER",
+      "txn_date": "2026-03-20",
+      "amount": 1575000,
+      "currency": "USD",
+      "description": "Invoice to Atlas Freight Co",
+      "counterparty": "Atlas Freight Co",
+      "reference": "AR-21533",
+      "due_date": "2026-04-19",
+      "doc_type": "INVOICE",
+      "meta": {
+        "open": true
+      }
+    },
+    {
+      "id": "BANK-5032",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-14",
+      "amount": -600000,
+      "currency": "USD",
+      "description": "ACH DEBIT KESTREL ANALYTICS LTD NET OF CN",
+      "counterparty": "KESTREL ANALYTIC",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5025",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-08",
+      "amount": -111420,
+      "currency": "USD",
+      "description": "INTL WIRE NW TRADERS EU FX EUR/USD",
+      "counterparty": "NW TRADERS EU",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5021",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-04-02",
+      "amount": -735000,
+      "currency": "USD",
+      "description": "ACH DEBIT CIRRUS CLD SERVICES",
+      "counterparty": "CIRRUS CLOUD SVCS",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3007",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-05",
+      "amount": -1240025,
+      "currency": "USD",
+      "description": "Bill from Northwind Traders GmbH",
+      "counterparty": "Northwind Traders GmbH",
+      "reference": "INV-88125",
+      "due_date": "2026-04-04",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5007",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-07",
+      "amount": -1240025,
+      "currency": "USD",
+      "description": "ACH DEBIT NORTHWIND TRADERS GMBH INV-88125",
+      "counterparty": "NORTHWIND TRADERS GMBH",
+      "reference": "INV-88125",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "INV-1008",
+      "source": "ERP_AR",
+      "side": "LEDGER",
+      "txn_date": "2026-03-25",
+      "amount": 480000,
+      "currency": "USD",
+      "description": "Invoice to Juniper Foods Ltd",
+      "counterparty": "Juniper Foods Ltd",
+      "reference": "AR-14624",
+      "due_date": "2026-04-24",
+      "doc_type": "INVOICE",
+      "meta": {
+        "open": true
+      }
+    },
+    {
+      "id": "BILL-3016",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-20",
+      "amount": -77510,
+      "currency": "USD",
+      "description": "Bill from Vantage Insurance Corp",
+      "counterparty": "Vantage Insurance Corp",
+      "reference": "INV-88553",
+      "due_date": "2026-04-19",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "STP-8004",
+      "source": "STRIPE",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-22",
+      "amount": 315584,
+      "currency": "USD",
+      "description": "STRIPE PAYOUT net of fees ch_8150752321",
+      "counterparty": "Juniper Foods Ltd",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "CHARGE",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3008",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-17",
+      "amount": -125000,
+      "currency": "USD",
+      "description": "Bill from Cirrus Cloud Services",
+      "counterparty": "Cirrus Cloud Services",
+      "reference": "INV-65981",
+      "due_date": "2026-04-16",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3013",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-10",
+      "amount": -330000,
+      "currency": "USD",
+      "description": "Bill from Onyx Facilities Pvt Ltd",
+      "counterparty": "Onyx Facilities Pvt Ltd",
+      "reference": "INV-76207",
+      "due_date": "2026-04-09",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3054",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-26",
+      "amount": -520000,
+      "currency": "USD",
+      "description": "Bill from Northwind Traders GmbH",
+      "counterparty": "Northwind Traders GmbH",
+      "reference": "INV-14461",
+      "due_date": "2026-05-10",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3010",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-11",
+      "amount": -330000,
+      "currency": "USD",
+      "description": "Bill from Halberd Legal LLP",
+      "counterparty": "Halberd Legal LLP",
+      "reference": "INV-83960",
+      "due_date": "2026-04-10",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5038",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-06",
+      "amount": -642600,
+      "currency": "USD",
+      "description": "ACH DEBIT KSTRL ANALYTICS UK INCL TAX",
+      "counterparty": "KESTREL ANALYTIC",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3036",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-11",
+      "amount": -275050,
+      "currency": "USD",
+      "description": "Bill from Northwind Traders GmbH",
+      "counterparty": "Northwind Traders GmbH",
+      "reference": "INV-73790",
+      "due_date": "2026-04-05",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3030",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-01",
+      "amount": -61500,
+      "currency": "USD",
+      "description": "Bill from Blue Bottle Coffee Inc",
+      "counterparty": "Blue Bottle Coffee Inc",
+      "reference": "INV-22089",
+      "due_date": "2026-03-29",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3045",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-09",
+      "amount": 20000,
+      "currency": "USD",
+      "description": "Credit note from Meridian Print Co",
+      "counterparty": "Meridian Print Co",
+      "reference": "CN-3464",
+      "due_date": null,
+      "doc_type": "CREDIT_NOTE",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5033",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-17",
+      "amount": -320000,
+      "currency": "USD",
+      "description": "ACH DEBIT MERIDIAN PRINTING NET OF CN",
+      "counterparty": "MERIDIAN PRINTING",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5016",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-21",
+      "amount": -77510,
+      "currency": "USD",
+      "description": "ACH DEBIT VANTAGE INS CORP INV-88553",
+      "counterparty": "VANTAGE INS",
+      "reference": "INV-88553",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3057",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-16",
+      "amount": -980000,
+      "currency": "USD",
+      "description": "Bill from Sable Media Group",
+      "counterparty": "Sable Media Group",
+      "reference": "INV-31337",
+      "due_date": "2026-04-15",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5018",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-04-05",
+      "amount": -482000,
+      "currency": "USD",
+      "description": "ACH DEBIT CIRRUSCLOUD.IO",
+      "counterparty": "CIRRUS CLD SERVICES",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3033",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-15",
+      "amount": -150000,
+      "currency": "USD",
+      "description": "Bill from Acme Logistics LLC",
+      "counterparty": "Acme Logistics LLC",
+      "reference": "INV-85687",
+      "due_date": "2026-04-08",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3026",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-14",
+      "amount": -8800000,
+      "currency": "INR",
+      "description": "Bill from Onyx Facilities Pvt Ltd",
+      "counterparty": "Onyx Facilities Pvt Ltd",
+      "reference": "INV-76520",
+      "due_date": "2026-04-13",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "INV-1001",
+      "source": "ERP_AR",
+      "side": "LEDGER",
+      "txn_date": "2026-03-21",
+      "amount": 64000,
+      "currency": "USD",
+      "description": "Invoice to Redwood Health Systems",
+      "counterparty": "Redwood Health Systems",
+      "reference": "AR-43406",
+      "due_date": "2026-04-04",
+      "doc_type": "INVOICE",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3021",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-27",
+      "amount": -735000,
+      "currency": "USD",
+      "description": "Bill from Cirrus Cloud Services",
+      "counterparty": "Cirrus Cloud Services",
+      "reference": "INV-73932",
+      "due_date": "2026-04-11",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3041",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-05",
+      "amount": -61500,
+      "currency": "USD",
+      "description": "Bill from Cirrus Cloud Services",
+      "counterparty": "Cirrus Cloud Services",
+      "reference": "INV-28033",
+      "due_date": "2026-04-03",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3055",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-22",
+      "amount": -520000,
+      "currency": "USD",
+      "description": "Bill from Meridian Print Co",
+      "counterparty": "Meridian Print Co",
+      "reference": "INV-67119",
+      "due_date": "2026-05-06",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5031",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-14",
+      "amount": -703025,
+      "currency": "USD",
+      "description": "ACH BATCH PMT CIRRUS CLD SERVICES 4 INV",
+      "counterparty": "CIRRUS CLOUD SVCS",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3052",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-11",
+      "amount": -450000,
+      "currency": "USD",
+      "description": "Bill from Meridian Print Co",
+      "counterparty": "Meridian Print Co",
+      "reference": "INV-63831",
+      "due_date": "2026-04-10",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5020",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-04-03",
+      "amount": -56025,
+      "currency": "USD",
+      "description": "ACH DEBIT ONYX FACILITIES",
+      "counterparty": "ONYX FACILITIES PVT",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "STP-8001",
+      "source": "STRIPE",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-23",
+      "amount": 62114,
+      "currency": "USD",
+      "description": "STRIPE PAYOUT net of fees ch_1870770489",
+      "counterparty": "Redwood Health Systems",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "CHARGE",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5022",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-31",
+      "amount": -735000,
+      "currency": "USD",
+      "description": "ACH DEBIT ACME LOGISTICS L.L.C.",
+      "counterparty": "ACME LOGISTIC",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3003",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-07",
+      "amount": -211575,
+      "currency": "USD",
+      "description": "Bill from Northwind Traders GmbH",
+      "counterparty": "Northwind Traders GmbH",
+      "reference": "INV-14265",
+      "due_date": "2026-04-06",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5003",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-09",
+      "amount": -211575,
+      "currency": "USD",
+      "description": "ACH DEBIT NORDWIND TRADERS INV-14265",
+      "counterparty": "NORDWIND TRADERS",
+      "reference": "INV-14265",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "STP-8003",
+      "source": "STRIPE",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-09",
+      "amount": 315584,
+      "currency": "USD",
+      "description": "STRIPE PAYOUT net of fees ch_3163588071",
+      "counterparty": "Pallas Robotics",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "CHARGE",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3034",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-13",
+      "amount": -99000,
+      "currency": "USD",
+      "description": "Bill from Northwind Traders GmbH",
+      "counterparty": "Northwind Traders GmbH",
+      "reference": "INV-99460",
+      "due_date": "2026-04-05",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5009",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-06",
+      "amount": -77510,
+      "currency": "USD",
+      "description": "ACH DEBIT ONYX FACILITIES PVT INV-41002",
+      "counterparty": "ONYX FACILITIES",
+      "reference": "INV-41002",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3027",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-23",
+      "amount": -420000,
+      "currency": "GBP",
+      "description": "Bill from Kestrel Analytics Ltd",
+      "counterparty": "Kestrel Analytics Ltd",
+      "reference": "INV-83358",
+      "due_date": "2026-04-22",
+      "doc_type": "BILL",
+      "meta": {}
+    },
+    {
+      "id": "BANK-5001",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-20",
+      "amount": -890000,
+      "currency": "USD",
+      "description": "ACH DEBIT SABLE MEDIA GROUP INV-91398",
+      "counterparty": "SABLE MEDIA GRP",
+      "reference": "INV-91398",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    },
+    {
+      "id": "STP-8002",
+      "source": "STRIPE",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-23",
+      "amount": 1456470,
+      "currency": "USD",
+      "description": "STRIPE PAYOUT net of fees ch_1452507466",
+      "counterparty": "Redwood Health Systems",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "CHARGE",
+      "meta": {}
+    },
+    {
+      "id": "BILL-3051",
+      "source": "ERP_AP",
+      "side": "LEDGER",
+      "txn_date": "2026-03-05",
+      "amount": -540000,
+      "currency": "USD",
+      "description": "Bill from Kestrel Analytics Ltd (net of tax)",
+      "counterparty": "Kestrel Analytics Ltd",
+      "reference": "INV-44746",
+      "due_date": "2026-04-04",
+      "doc_type": "BILL",
+      "meta": {
+        "tax_treatment": "EXCLUSIVE",
+        "jurisdiction": "DE_VAT"
+      }
+    },
+    {
+      "id": "BANK-5040",
+      "source": "BANK",
+      "side": "SETTLEMENT",
+      "txn_date": "2026-03-14",
+      "amount": -31844,
+      "currency": "USD",
+      "description": "CARD 4471 UNKNOWN MERCHANT SVC",
+      "counterparty": "",
+      "reference": "",
+      "due_date": null,
+      "doc_type": "TRANSFER",
+      "meta": {}
+    }
+  ],
+  "audit_head": "732b7eb4807f59aa83dc53052248b7fc7b17bf9ddaf49d87304e5853310372bc",
+  "elapsed_ms": 227.14699996868148,
+  "seed": 20260827,
+  "as_of": "2026-04-05"
+}
