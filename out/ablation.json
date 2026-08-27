@@ -27,14 +27,14 @@
     {
       "config": "no reversal pass",
       "kind": "ablation",
-      "precision": 0.9385422962169627,
-      "recall": 0.825,
+      "precision": 0.9373517027544306,
+      "recall": 0.7990566037735849,
       "resolution": 0.875943396226415,
       "false_positives": 114,
       "mis_booked_value": 71290000,
-      "booked": 1864,
+      "booked": 1808,
       "events": 2520,
-      "exceptions": 1003
+      "exceptions": 1059
     },
     {
       "config": "no L3 resolver",
@@ -51,14 +51,14 @@
     {
       "config": "no cohort pass",
       "kind": "ablation",
-      "precision": 0.9989472517730495,
-      "recall": 0.9183962264150944,
+      "precision": 0.9994791666666666,
+      "recall": 0.8915094339622641,
       "resolution": 0.9863207547169811,
       "false_positives": 1,
       "mis_booked_value": 600000,
-      "booked": 1949,
+      "booked": 1891,
       "events": 2520,
-      "exceptions": 842
+      "exceptions": 900
     },
     {
       "config": "no policy gate",
@@ -75,14 +75,14 @@
     {
       "config": "LedgerGuard (full)",
       "kind": "full",
-      "precision": 0.9989472517730495,
-      "recall": 0.9221698113207548,
+      "precision": 0.9994791666666666,
+      "recall": 0.8952830188679245,
       "resolution": 0.9900943396226415,
       "false_positives": 1,
       "mis_booked_value": 600000,
-      "booked": 1957,
+      "booked": 1899,
       "events": 2520,
-      "exceptions": 826
+      "exceptions": 884
     }
   ],
   "cost": {

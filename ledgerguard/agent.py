@@ -78,7 +78,30 @@ class Resolver:
                     "itself if this expense was never entered."))
             return oc
 
-        plan = self.planner.plan(s, cands)
+        # A planner is an untrusted input. It may be a model, and a model can be
+        # rate-limited, wedged, or simply wrong - none of which is a reason to
+        # abandon a close. Fall back to the built-in ordering and carry on.
+        try:
+            plan = list(self.planner.plan(s, cands))
+        except Exception as exc:
+            self.c.audit.emit("PLANNER_FAILED", settlement=s.id,
+                              planner=type(self.planner).__name__,
+                              error=f"{type(exc).__name__}: {exc}",
+                              fallback="HeuristicPlanner")
+            plan = HeuristicPlanner().plan(s, cands)
+
+        # The competing-allocation check is a safety property, so it cannot be
+        # left to the planner to enable. A plan that proposes `split` without
+        # `instalment` (or the reverse) would otherwise book the one reading it
+        # was told about and never discover that another reading closes just as
+        # exactly - silently disabling the check by omission. Red-teaming found
+        # this: a planner emitting mostly-invalid hypothesis names mis-booked
+        # value the built-in planner did not.
+        if "split" in plan and "instalment" not in plan:
+            plan.append("instalment")
+        elif "instalment" in plan and "split" not in plan:
+            plan.append("split")
+
         self.c.audit.emit("L3_PLAN", settlement=s.id, hypotheses=plan,
                           planner=type(self.planner).__name__)
 

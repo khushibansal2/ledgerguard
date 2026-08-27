@@ -71,7 +71,13 @@ def main(n_seeds: int = 60) -> int:
 
     _check("precision >= 99.5%", m(prec), 0.995, results)
     _check("dollar-weighted precision >= 99.5%", m(dwp), 0.995, results)
-    _check("straight-through >= 90%", m(rec), 0.90, results)
+    # Deliberately below the measured figure and deliberately not the headline.
+    # Automation is the metric that should *fall* when authority tightens: the
+    # exposure fix that gates multi-line matches on the whole event, not the
+    # first line, moved this from 92.5% to 89.5% and improved precision. A
+    # ceiling here would create pressure to book material items on thin
+    # evidence, which is the opposite of the point.
+    _check("straight-through >= 88%", m(rec), 0.88, results)
     _check("resolution recall >= 98.5%", m(res), 0.985, results)
     _check("escalation recall == 100%", m(esc), 1.0, results)
 

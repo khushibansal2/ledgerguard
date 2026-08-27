@@ -130,6 +130,59 @@ def test_output_is_invariant_under_input_order():
                 assert got == baseline, f"seed {seed}: permutation {perm} changed the close"
 
 
+def test_hostile_planner_cannot_move_the_ledger():
+    """The architecture's central safety claim, tested rather than argued.
+
+    The planner slot is the only place a model influences a booking. If a
+    hostile planner can cause a double-booking, a dropped record, an open
+    residual or a booking above its delegated authority, then the containment
+    is fictional and the design reduces to "trust the model".
+
+    Red-teaming this found two real defects: a planner that raised killed the
+    whole close, and one that omitted a hypothesis silently disabled the
+    competing-allocation check.
+    """
+    from ledgerguard.redteam import HOSTILE, check_invariants
+
+    for planner in HOSTILE:
+        for seed in SEEDS[:4]:
+            b = generate(seed=seed)
+            c = Controller(b.records, policy=Policy(), audit=AuditLog(),
+                           planner=planner).run()
+            failures = check_invariants(b, c, getattr(planner, "name", "?"))
+            assert not failures, failures[:3]
+
+
+def test_hostile_planner_cannot_mis_book_value():
+    """Beyond the structural invariants: the money must land the same way."""
+    from ledgerguard.redteam import HOSTILE
+
+    for planner in HOSTILE:
+        for seed in SEEDS[:4]:
+            b = generate(seed=seed)
+            c = Controller(b.records, policy=Policy(), audit=AuditLog(),
+                           planner=planner).run()
+            mis = evaluate(b, c)["value"]["mis_booked"]
+            assert mis == 0, (f"{getattr(planner, 'name', '?')} mis-booked "
+                              f"{mis} on seed {seed}")
+
+
+def test_booking_authority_uses_total_exposure():
+    """A multi-line match must be gated on the whole event, not one line.
+
+    An instalment group clearing a $10,000 bill exposes $10,000 even though its
+    first payment is $6,000; gating on the payment would authorise it a rung
+    too low. Found by the red-team invariants.
+    """
+    for seed in SEEDS[:6]:
+        _, c, _ = _run(seed)
+        for m in c.matches:
+            exposure = c._exposure(m)
+            assert m.confidence >= c.policy.required_confidence(exposure), (
+                f"{m.match_id} booked at {m.confidence:.2f} on exposure "
+                f"{exposure} needing {c.policy.required_confidence(exposure):.2f}")
+
+
 # --- tools ------------------------------------------------------------------
 def test_tools_refuse_rather_than_guess():
     assert fx_convert(100, "JPY", "USD", "2026-03-01")["ok"] is False

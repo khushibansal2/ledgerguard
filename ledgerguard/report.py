@@ -144,6 +144,22 @@ def difficulty_list(agg: dict) -> str:
     return "".join(out)
 
 
+def redteam_table(rt: dict) -> str:
+    rows = []
+    for r in rt["rows"]:
+        cls = "row--full" if r["control"] else ""
+        rows.append(
+            f'<tr class="{cls}"><td>{_e(r["planner"])}</td>'
+            f'<td class="num">{r["booked"]:,}</td>'
+            f'<td class="num">{_e(fmt(r["mis_booked"]))}</td>'
+            f'<td class="num">{r["tool_calls"]:,}</td>'
+            f'<td class="num">{_e(r["verdict"])}</td></tr>')
+    return ('<div class="scroll"><table><thead><tr><th>Planner</th>'
+            '<th class="num">Booked</th><th class="num">Mis-booked</th>'
+            '<th class="num">Tool calls</th><th class="num">Invariants</th>'
+            '</tr></thead><tbody>' + "".join(rows) + "</tbody></table></div>")
+
+
 def ladder_table(res: dict) -> str:
     names = ["routine", "reviewable", "material", "significant"]
     rows = []
@@ -437,7 +453,8 @@ footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);
 """
 
 
-def build(res: dict, agg: dict, ab: dict, trace_text: str = "") -> str:
+def build(res: dict, agg: dict, ab: dict, trace_text: str = "",
+          rt: dict | None = None) -> str:
     cost = ab["cost"]
     resid = agg["residual_failures"]
     resid_txt = ", ".join(f"{k.replace('_', ' ')} ({v})" for k, v in resid.items())
@@ -492,6 +509,20 @@ def build(res: dict, agg: dict, ab: dict, trace_text: str = "") -> str:
      log &mdash; nothing re-run, nothing re-derived. The planner proposes an
      explanation; a deterministic tool computes it; the gate decides.</p>
   {trace_block(trace_text)}
+</section>
+
+<section>
+  <h2>Can a hostile planner move the ledger?</h2>
+  <p class="lede">The design rests on the claim that a model only orders
+     hypotheses while deterministic tools compute and a policy gate decides.
+     That is a safety claim, so it is tested rather than argued: six hostile
+     planners, same batches, same invariants. The worst a bad plan achieves is
+     spending 27&times; the tool calls to reach the same ledger.</p>
+  {redteam_table(rt)}
+  <p class="pos__note">Building this found two real defects &mdash; a planner
+     that raised killed the entire close, and a planner that omitted one
+     hypothesis silently disabled the competing-allocation check, mis-booking
+     $21,300 until the check was made mandatory rather than planner-chosen.</p>
 </section>
 
 <section>
@@ -603,7 +634,8 @@ def main() -> None:
     trace_text = render(ctrl, example)
 
     target = OUT / "dashboard.html"
-    target.write_text(build(res, agg, ab, trace_text), encoding="utf-8")
+    rt = json.loads((OUT / "redteam.json").read_text(encoding="utf-8"))
+    target.write_text(build(res, agg, ab, trace_text, rt), encoding="utf-8")
     print(f"wrote {target} ({target.stat().st_size:,} bytes)")
 
 

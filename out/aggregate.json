@@ -2,30 +2,30 @@
   "n_batches": 200,
   "records": 27218,
   "events": 12600,
-  "booked": 9822,
-  "held": 694,
-  "exceptions": 4087,
-  "precision_mean": 0.9985829387346864,
+  "booked": 9506,
+  "held": 1010,
+  "exceptions": 4403,
+  "precision_mean": 0.9991754726309128,
   "precision_worst": 0.9591836734693877,
-  "recall_mean": 0.9252830188679245,
-  "recall_worst": 0.8113207547169812,
-  "resolution_mean": 0.9903773584905661,
+  "recall_mean": 0.8960377358490567,
+  "recall_worst": 0.7924528301886793,
+  "resolution_mean": 0.9902830188679245,
   "resolution_worst": 0.9056603773584906,
   "escalation_mean": 1.0,
   "escalation_worst": 1.0,
   "fp": 2,
-  "unresolved": 84,
-  "partial": 12,
-  "equivalent": 295,
-  "ms_mean": 147.4070714978734,
-  "rps": 923.2257219217827,
+  "unresolved": 92,
+  "partial": 6,
+  "equivalent": 280,
+  "ms_mean": 112.3186409950722,
+  "rps": 1211.642153024009,
   "calls_per_event": 1.4796825396825397,
   "l3_share": 0.4357142857142857,
   "pre_l3_share": 0.5642857142857143,
-  "dollar_weighted_precision": 0.9974179591985837,
+  "dollar_weighted_precision": 0.9989755711803722,
   "value_settled": 6319734723,
   "value_mis_booked": 1200000,
-  "value_held": 922637705,
+  "value_held": 1304717705,
   "calibration": {
     "1.00-1.00": {
       "n": 3200,
@@ -40,8 +40,8 @@
       "acc": 1.0
     },
     "0.85-0.90": {
-      "n": 1298,
-      "acc": 0.9892141756548536
+      "n": 982,
+      "acc": 0.9918533604887984
     },
     "0.00-0.85": {
       "n": 939,
@@ -67,7 +67,7 @@
     },
     "instalment_settlement": {
       "total": 600,
-      "correct": 310
+      "correct": 0
     },
     "payment_reversal_pair": {
       "total": 400,
@@ -102,11 +102,11 @@
     "L0_REVERSAL": 800,
     "L1_DETERMINISTIC": 3400,
     "L2_SIMILARITY": 1173,
-    "L3_AGENTIC": 4449
+    "L3_AGENTIC": 4133
   },
   "residual_failures": {
-    "instalment_settlement": 13,
+    "instalment_settlement": 18,
     "timing_lag_cross_month": 69,
-    "short_pay_credit_note": 2
+    "short_pay_credit_note": 5
   }
 }

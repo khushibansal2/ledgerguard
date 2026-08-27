@@ -22,6 +22,11 @@ jobs:
 
       # The accuracy claims in the README are checked here, not trusted.
       # If a change regresses precision or starts dropping records, CI fails.
+      # The model slot is the only untrusted input in the pipeline. This
+      # asserts a hostile planner cannot move the ledger, only waste tool calls.
+      - name: Adversarial planner containment
+        run: python -m ledgerguard.redteam 20
+
       - name: Accuracy regression gate
         run: python -m ledgerguard.verify_claims
 

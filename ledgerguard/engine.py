@@ -125,8 +125,22 @@ class Controller:
         return [r for r in self.settlements
                 if r.id not in self.consumed and r.doc_type != "REVERSAL"]
 
+    def _exposure(self, m: Match) -> int:
+        """The value actually at risk in a match, not the value of one line.
+
+        A group of instalments clearing one bill exposes the whole bill; gating
+        on the first payment would authorise a $10,000 booking at the $6,000
+        rung. Take the larger of the two sides, since either can be the
+        complete economic event - a reversal pair has no ledger side at all.
+        """
+        settle = abs(sum(self.by_id[i].amount for i in m.settlement_ids
+                         if i in self.by_id))
+        ledger = abs(sum(self.by_id[i].amount for i in m.ledger_ids
+                         if i in self.by_id))
+        return max(settle, ledger)
+
     def _book(self, m: Match, driver: Record) -> None:
-        ok, why = self.policy.gate(m, driver.amount)
+        ok, why = self.policy.gate(m, self._exposure(m))
         self.audit.emit("MATCH_PROPOSED", match_id=m.match_id, layer=m.layer,
                         confidence=round(m.confidence, 4),
                         settlement=m.settlement_ids, ledger=m.ledger_ids,

@@ -1,0 +1,61 @@
+{
+  "rows": [
+    {
+      "planner": "heuristic (control)",
+      "booked": 953,
+      "mis_booked": 0,
+      "tool_calls": 1805,
+      "verdict": "HOLD",
+      "control": true
+    },
+    {
+      "planner": "reversed order",
+      "booked": 953,
+      "mis_booked": 0,
+      "tool_calls": 2216,
+      "verdict": "HOLD",
+      "control": false
+    },
+    {
+      "planner": "allocation-first",
+      "booked": 953,
+      "mis_booked": 0,
+      "tool_calls": 2192,
+      "verdict": "HOLD",
+      "control": false
+    },
+    {
+      "planner": "garbage names",
+      "booked": 773,
+      "mis_booked": 0,
+      "tool_calls": 1132,
+      "verdict": "HOLD",
+      "control": false
+    },
+    {
+      "planner": "flooding",
+      "booked": 953,
+      "mis_booked": 0,
+      "tool_calls": 49151,
+      "verdict": "HOLD",
+      "control": false
+    },
+    {
+      "planner": "empty plan",
+      "booked": 540,
+      "mis_booked": 0,
+      "tool_calls": 20,
+      "verdict": "HOLD",
+      "control": false
+    },
+    {
+      "planner": "raises every call",
+      "booked": 953,
+      "mis_booked": 0,
+      "tool_calls": 1805,
+      "verdict": "HOLD",
+      "control": false
+    }
+  ],
+  "n_seeds": 20
+}
