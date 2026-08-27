@@ -12,33 +12,40 @@ python -m ledgerguard.cli --seeds 200     # robustness across 200 batches
 python -m ledgerguard.ablate              # does each layer earn its place?
 python -m ledgerguard.report              # regenerate the HTML close report
 python tests/test_controller.py           # 13 invariants, no pytest needed
-python -m ledgerguard.verify_claims       # re-verify every number in this README
+python -m ledgerguard.verify_claims       # re-verify every accuracy claim
+python -m ledgerguard.check_readme        # assert this README matches the run
 python -m ledgerguard.cli --csv work.csv  # exception worklist for the controller
 ```
 
-Every figure below is asserted in CI by `verify_claims`, so a change that
-regresses accuracy fails the build instead of quietly shipping.
+Every figure below is asserted in CI: `verify_claims` re-measures the accuracy
+claims, and `check_readme` asserts the numbers written here still match the
+committed run output. A change that regresses accuracy — or a stale figure left
+in this file — fails the build instead of quietly shipping.
 
 ## Measured, not asserted
 
-Over **200 independent batches — 22,576 records, 9,400 settlement events**,
+Over **200 independent batches — 22,618 records, 9,400 settlement events**,
 graded against a truth key the engine never sees:
 
 | Metric | Result | |
 |---|---|---|
 | Precision | **99.93%** | 0 false positives; 6 partial matches in 8,800 links |
 | Straight-through | **93.5%** | booked with no human involvement |
-| Resolved correctly | **99.2%** | including items held for sign-off |
+| Resolved correctly | **99.1%** | including items held for sign-off |
 | Escalation recall | **100%** | every truly-unmatchable record refused |
 | Throughput | ~1,180 rec/s | ~85 ms per batch |
-| Model usage | 1.25 tool calls/event | 81% of events never reach a model |
+| Model usage | 1.48 tool calls/event | 48% settled before the resolver is reached |
 
 Confidence is calibrated, not decorative — pooled over 9,400 events, every
 confidence band's observed accuracy matches its label.
 
 ## The design in one idea
 
-Three layers, each costing more and trusted less than the one above it:
+Three layers, each costing more and trusted less than the one above it. In the
+default configuration **no model is called at all** — the built-in planner runs
+the same hypothesis set. Enabling the LLM planner sends it only the 51.8% of
+settlements that fail to tie out; the other 48.2% are settled by arithmetic
+before the resolver is ever reached.
 
 | | Layer | Test | Model involved |
 |---|---|---|---|
@@ -95,9 +102,10 @@ it — that test exists to remove the incentive.
 - **69 unresolved** (0.78%), all one shape: an unequal cohort of identical
   amounts — three indistinguishable bills against two indistinguishable
   payments. No fact separates them, so it refuses rather than guesses.
-- **4 partial matches** (0.045%): two short-payments from one vendor, each net of
-  a credit note, where the resolver applied the sibling's credit note. The pair
-  nets correctly; the individual application does not.
+- **6 partial matches** (0.068%): two short-payments from one vendor, each net
+  of a credit note, where the resolver applied the sibling's credit note. Both
+  groupings balance to the cent, so arithmetic cannot separate them; the pair
+  nets correctly, the individual application does not.
 - **The policy gate is unproven on this data.** Removing it raises
   straight-through to 99.2% with no measured precision loss. It is retained as
   tail-risk insurance against errors this synthetic distribution does not
@@ -137,7 +145,8 @@ ledgerguard/
   evaluate.py     precision / recall / calibration against the truth key
   ablate.py       baselines and per-layer ablations
   report.py       HTML close report, generated from run output
-  verify_claims.py  turns every published number into a build gate
+  verify_claims.py  turns every accuracy claim into a build gate
+  check_readme.py   asserts the README matches the committed run output
 tests/            13 property invariants
 out/              results.json, aggregate.json, ablation.json, audit.jsonl, dashboard.html
 ```

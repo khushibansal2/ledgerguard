@@ -82,5 +82,7 @@
   },
   "residual_failures": {
     "timing_lag_cross_month": 69
-  }
+  },
+  "l3_share": 0.5179787234042553,
+  "pre_l3_share": 0.4820212765957447
 }

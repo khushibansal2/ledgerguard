@@ -144,6 +144,23 @@ def run_ablation(seeds: list[int]) -> list[dict[str, Any]]:
     return rows
 
 
+def measure_l3_share(seeds: list[int], events: int) -> int:
+    """Count how many settlements actually reach the resolver.
+
+    Worth measuring rather than assuming: the routing share is the entire basis
+    of the cost claim, and an estimate here would quietly become a published
+    number that nothing checks. Counting L3 retrievals in the audit trail is the
+    same evidence a reviewer would use.
+    """
+    reached = total = 0
+    for seed in seeds:
+        batch = generate(seed=seed)
+        ctrl = Controller(batch.records, policy=Policy(), audit=AuditLog()).run()
+        total += len(ctrl.settlements)
+        reached += sum(1 for e in ctrl.audit.entries if e["event"] == "L3_RETRIEVAL")
+    return round(events * reached / total) if total else 0
+
+
 def cost_model(events: int, l3_events: int,
                tokens_per_call: int = 1500,
                usd_per_mtok: float = 3.0) -> dict[str, Any]:
@@ -187,8 +204,7 @@ def main(n_seeds: int = 40, start: int = 20260827) -> None:
     print("  mis-booked = value of settlements posted against the wrong document")
 
     full = next(r for r in rows if r["kind"] == "full")
-    l3_share = 0.19
-    cm = cost_model(full["events"], int(full["events"] * l3_share))
+    cm = cost_model(full["events"], measure_l3_share(seeds, full["events"]))
     print(f"\n  COST OF THE ALTERNATIVE DESIGN\n  " + "-" * (w - 4))
     print(f"  send every row to a model   {cm['llm_per_row_tokens']:>12,} tokens"
           f"   ${cm['llm_per_row_usd']:>8,.2f}")

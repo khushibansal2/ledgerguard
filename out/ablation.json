@@ -76,12 +76,12 @@
   "cost": {
     "events": 9400,
     "llm_per_row_tokens": 14100000,
-    "layered_tokens": 6793500,
-    "tokens_saved": 7306500,
-    "pct_routed_to_model": 0.4818085106382979,
+    "layered_tokens": 7303500,
+    "tokens_saved": 6796500,
+    "pct_routed_to_model": 0.5179787234042553,
     "llm_per_row_usd": 42.3,
-    "layered_usd": 20.380499999999998,
-    "usd_saved": 21.9195
+    "layered_usd": 21.9105,
+    "usd_saved": 20.389499999999998
   },
   "n_seeds": 40
 }

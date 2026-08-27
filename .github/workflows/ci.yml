@@ -24,3 +24,8 @@ jobs:
       # If a change regresses precision or starts dropping records, CI fails.
       - name: Accuracy regression gate
         run: python -m ledgerguard.verify_claims
+
+      # The README is hand-written and so can drift from the run it describes.
+      # This asserts every published figure still matches the committed output.
+      - name: Published figures match run output
+        run: python -m ledgerguard.check_readme
