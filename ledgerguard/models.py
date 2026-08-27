@@ -77,6 +77,12 @@ class Exception_:
     amount: int = 0
     currency: str = "USD"
     evidence: dict[str, Any] = field(default_factory=dict)
+    # What single fact would let a controller close this without judgement.
+    # An exception that says only "could not match" hands the human the same
+    # dead end the engine hit; naming the missing evidence turns the queue into
+    # a list of things to go and ask for. Declared last so the existing
+    # positional constructors stay valid.
+    missing_evidence: str = ""
 
     def to_dict(self) -> dict:
         return asdict(self)

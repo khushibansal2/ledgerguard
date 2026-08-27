@@ -39,12 +39,14 @@ def _pct(x: float, dp: int = 1) -> str:
 # --- fragments --------------------------------------------------------------
 def kpi_block(agg: dict) -> str:
     cards = [
-        ("Precision", _pct(agg["precision_mean"], 2), "good",
-         f"{agg['fp']} false positives in {agg['events']:,} settlement events"),
+        ("Mis-booked value", fmt(agg["value_mis_booked"]), "good",
+         f"out of {fmt(agg['value_settled'])} settled across "
+         f"{agg['events']:,} events"),
+        ("Dollar-weighted precision", _pct(agg["dollar_weighted_precision"], 2),
+         "good", f"row precision {_pct(agg['precision_mean'], 2)} "
+                 f"({agg['fp']} wrong bookings)"),
         ("Straight-through", _pct(agg["recall_mean"]), "accent",
-         f"{agg['booked']:,} booked with no human touch"),
-        ("Resolved correctly", _pct(agg["resolution_mean"]), "accent",
-         "including items held for sign-off"),
+         "cleared with no human involvement"),
         ("Exceptions caught", _pct(agg["escalation_mean"], 0), "good",
          "every unmatchable record refused, none dropped"),
     ]
@@ -61,6 +63,9 @@ def kpi_block(agg: dict) -> str:
 def waterfall(agg: dict) -> str:
     mix = agg["layer_mix"]
     rows = [
+        ("L0", "Reversal pairing", mix.get("L0_REVERSAL", 0),
+         "Returns and chargebacks that settle no document. Removing this pass "
+         "costs $712,900 in mis-bookings.", "no model"),
         ("L1", "Exact reference", mix.get("L1_DETERMINISTIC", 0),
          "Reference and amount agree to the cent. Proof, not inference.", "no model"),
         ("L2", "Entity + timing", mix.get("L2_SIMILARITY", 0),
@@ -139,6 +144,42 @@ def difficulty_list(agg: dict) -> str:
     return "".join(out)
 
 
+def ladder_table(res: dict) -> str:
+    names = ["routine", "reviewable", "material", "significant"]
+    rows = []
+    for i, rung in enumerate(res.get("policy_ladder", [])):
+        t = rung["threshold"]
+        label = "under $1,000" if t == 0 else f"{fmt(t)} and above"
+        rows.append(f'<tr><td>{_e(names[i] if i < len(names) else "-")}</td>'
+                    f'<td class="mono">{_e(label)}</td>'
+                    f'<td class="num">{rung["required_confidence"]:.2f}</td></tr>')
+    return ('<div class="scroll"><table><thead><tr><th>Band</th><th>Value</th>'
+            '<th class="num">Confidence required</th></tr></thead><tbody>'
+            + "".join(rows) + "</tbody></table></div>")
+
+
+def trace_block(trace_text: str) -> str:
+    return f'<pre class="trace">{_e(trace_text)}</pre>'
+
+
+def impact_block(res: dict) -> str:
+    i = res.get("reconciliation_impact")
+    if not i:
+        return ""
+    return (
+        '<div class="impact">'
+        f'<p><b>{i["documents_cleared"]}</b> documents cleared against '
+        f'settlements in this batch.</p>'
+        f'<p>A forecast built on the <i>unreconciled</i> ledger would have '
+        f'expected <span class="mono">{_e(fmt(i["naive_expected_inflow"]))}</span> '
+        f'of receivables. After the close the true figure is '
+        f'<span class="mono">{_e(fmt(i["receivables_after_close"]))}</span> &mdash; '
+        f'an overstatement of '
+        f'<span class="mono neg">{_e(fmt(i["receivables_already_settled"]))}</span>, '
+        f'entirely from counting invoices that were already paid.</p>'
+        '</div>')
+
+
 def exception_ledger(res: dict) -> str:
     by_sev: dict[str, list] = {s: [] for s in SEV_ORDER}
     for e in res["exceptions"]:
@@ -160,7 +201,10 @@ def exception_ledger(res: dict) -> str:
                 + (f' &middot; {_e(blurb)}' if blurb else "") + "</p>"
                 f'<p class="exc__reason">{_e(e["reason"])}</p>'
                 f'<p class="exc__action"><span>Next</span>{_e(e["suggested_action"])}</p>'
-                "</article>")
+                + (f'<p class="exc__missing"><span>Missing</span>'
+                   f'{_e(e["missing_evidence"])}</p>'
+                   if e.get("missing_evidence") else "")
+                + "</article>")
     return "".join(out)
 
 
@@ -282,6 +326,8 @@ h2::after{content:"";flex:1;height:1px;background:var(--line)}
 .flow__tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;font-weight:600;
   padding:4px 7px;border-radius:2px;background:var(--accent-soft);color:var(--accent);
   min-width:46px;text-align:center;margin-top:2px}
+.flow__tag--l0{background:var(--good-soft);color:var(--good)}
+.track__fill--l0{background:var(--good)}
 .flow__tag--hold{background:var(--warn-soft);color:var(--warn)}
 .flow__tag--exc{background:var(--bad-soft);color:var(--bad)}
 .flow__body{flex:1;min-width:0}
@@ -351,6 +397,21 @@ td.neg{color:var(--bad)}
   text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);
   padding:1px 5px;border-radius:2px;flex:none}
 
+.exc__missing{margin:8px 0 0;font-size:13.5px;display:flex;gap:10px;
+  align-items:baseline;color:var(--ink-2)}
+.exc__missing span{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);
+  padding:1px 5px;border-radius:2px;flex:none}
+.trace{background:var(--card);border:1px solid var(--line);border-radius:3px;
+  padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;
+  line-height:1.65;margin:0;box-shadow:var(--shadow);color:var(--ink)}
+.impact{background:var(--card);border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:3px;padding:16px 18px;
+  box-shadow:var(--shadow)}
+.impact p{margin:0 0 10px}
+.impact p:last-child{margin-bottom:0}
+.neg{color:var(--bad)}
+
 /* position */
 .pos{background:var(--card);border:1px solid var(--line);border-radius:3px;
   box-shadow:var(--shadow);color:inherit}
@@ -376,7 +437,7 @@ footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);
 """
 
 
-def build(res: dict, agg: dict, ab: dict) -> str:
+def build(res: dict, agg: dict, ab: dict, trace_text: str = "") -> str:
     cost = ab["cost"]
     resid = agg["residual_failures"]
     resid_txt = ", ".join(f"{k.replace('_', ' ')} ({v})" for k, v in resid.items())
@@ -424,6 +485,26 @@ def build(res: dict, agg: dict, ab: dict) -> str:
 </section>
 
 <section>
+  <h2>Where the agent actually is</h2>
+  <p class="lede">Most of this pipeline is deliberately deterministic, so the
+     fair question is where a model touches a booking at all. This is one
+     settlement's complete decision path, reconstructed from the hash-chained
+     log &mdash; nothing re-run, nothing re-derived. The planner proposes an
+     explanation; a deterministic tool computes it; the gate decides.</p>
+  {trace_block(trace_text)}
+</section>
+
+<section>
+  <h2>Authority rises with the money</h2>
+  <p class="lede">A single confidence threshold is either too loose at the top of
+     the book or too strict at the bottom &mdash; and a controller made to approve
+     trivia stops reading the queue, which is its own failure mode. The gate is a
+     delegated-authority ladder, calibrated against the confidence the evidence
+     layers actually produce.</p>
+  {ladder_table(res)}
+</section>
+
+<section>
   <h2>Does each layer earn its place?</h2>
   <p class="lede">The same batches, graded the same way, with one capability
      removed at a time. Record order is shuffled before every run, so nothing
@@ -462,7 +543,8 @@ def build(res: dict, agg: dict, ab: dict) -> str:
   <p class="lede">Built on the matched set, not the raw ledger. A forecast from
      unreconciled books double-counts: the invoice still sits in receivables while
      the cash that settled it already sits in the bank balance.</p>
-  <div class="duo">
+  {impact_block(res)}
+  <div class="duo" style="margin-top:20px">
     <div>{position_block(res)}</div>
     <div>{forecast_table(res)}</div>
   </div>
@@ -507,8 +589,21 @@ def main() -> None:
     res = json.loads((OUT / "results.json").read_text(encoding="utf-8"))
     agg = json.loads((OUT / "aggregate.json").read_text(encoding="utf-8"))
     ab = json.loads((OUT / "ablation.json").read_text(encoding="utf-8"))
+    # Render a real trace from a real run rather than pasting an example.
+    from .audit import AuditLog
+    from .engine import Controller, Policy
+    from .generate import generate
+    from .trace import render
+
+    batch = generate(seed=res["seed"])
+    ctrl = Controller(batch.records, policy=Policy(), audit=AuditLog()).run()
+    example = next((m.settlement_ids[0] for m in ctrl.matches
+                    if m.layer == "L3_AGENTIC" and "fx_convert" in m.tools_used),
+                   ctrl.settlements[0].id)
+    trace_text = render(ctrl, example)
+
     target = OUT / "dashboard.html"
-    target.write_text(build(res, agg, ab), encoding="utf-8")
+    target.write_text(build(res, agg, ab, trace_text), encoding="utf-8")
     print(f"wrote {target} ({target.stat().st_size:,} bytes)")
 
 

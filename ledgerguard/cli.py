@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import sys
 import time
 from pathlib import Path
 
@@ -41,6 +42,10 @@ def run_once(seed: int, as_of: str, opening: int, use_llm: bool,
 
 
 def main(argv: list[str] | None = None) -> int:
+    try:                       # currency symbols must survive a cp1252 console
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
     ap = argparse.ArgumentParser(prog="ledgerguard",
                                  description="Autonomous reconciliation & cash controller")
     ap.add_argument("--seed", type=int, default=20260827)
@@ -130,6 +135,25 @@ def main(argv: list[str] | None = None) -> int:
           f"({q['correctly_escalated']}/{q['should_escalate']} truly-unmatchable "
           f"records correctly refused)")
 
+    v = ev["value"]
+    print(f"\n  VALUE UNDER CONTROL (what the money did, not just the rows)\n{SUB}")
+    print(f"  settled in period        {fmt(v['total_settled']):>16}")
+    print(f"  booked correctly         {fmt(v['correctly_booked']):>16}"
+          f"   {_pct(v['share_auto_booked'])} of value")
+    print(f"  MIS-BOOKED               {fmt(v['mis_booked']):>16}"
+          f"   dollar-weighted precision {_pct(v['dollar_weighted_precision'])}")
+    print(f"  held for sign-off        {fmt(v['held_for_review']):>16}")
+
+    imp = fc.reconciliation_impact()
+    print(f"\n  WHAT THE CLOSE CHANGED\n{SUB}")
+    print(f"  {imp['documents_cleared']} documents cleared against settlements.")
+    print(f"  Forecasting on the unreconciled ledger would have expected "
+          f"{fmt(imp['naive_expected_inflow'])}")
+    print(f"  of receivables. After the close the true figure is "
+          f"{fmt(imp['receivables_after_close'])} - an")
+    print(f"  overstatement of {fmt(imp['receivables_already_settled'])}, "
+          f"from counting invoices already paid.")
+
     print(f"\n  CASH POSITION\n{SUB}")
     print(f"  opening balance          {fmt(pos['opening_balance']):>16}")
     print(f"  cleared movements        {fmt(pos['cleared_movements']):>16}")
@@ -166,6 +190,9 @@ def main(argv: list[str] | None = None) -> int:
         Path(args.json).parent.mkdir(parents=True, exist_ok=True)
         Path(args.json).write_text(json.dumps({
             "evaluation": ev, "position": pos, "forecast": proj, "ageing": age,
+            "reconciliation_impact": fc.reconciliation_impact(),
+            "policy_ladder": [{"threshold": t, "required_confidence": c}
+                              for t, c in ctrl.policy.ladder],
             "matches": [m.to_dict() for m in ctrl.matches],
             "held": [m.to_dict() for m in ctrl.escalated],
             "exceptions": [e.to_dict() for e in ctrl.exceptions],

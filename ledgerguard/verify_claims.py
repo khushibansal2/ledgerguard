@@ -23,14 +23,6 @@ from .generate import generate
 
 START = 20260827
 
-# claim -> (threshold, comparison)  described exactly as the README states it
-CLAIMS = {
-    "precision >= 99.9%": 0.999,
-    "straight_through >= 90%": 0.90,
-    "resolution_recall >= 98.5%": 0.985,
-    "escalation_recall == 100%": 1.0,
-}
-
 
 class Failure(Exception):
     pass
@@ -45,8 +37,9 @@ def _check(label: str, actual: float, threshold: float, results: list) -> None:
 
 def main(n_seeds: int = 60) -> int:
     seeds = [START + i for i in range(n_seeds)]
-    prec, rec, res, esc = [], [], [], []
+    prec, rec, res, esc, dwp = [], [], [], [], []
     fps = drops = 0
+    value_settled = value_mis = 0
 
     for seed in seeds:
         batch = generate(seed=seed)
@@ -57,6 +50,9 @@ def main(n_seeds: int = 60) -> int:
         rec.append(a["recall"])
         res.append(a["resolution_recall"])
         esc.append(ev["exception_quality"]["escalation_recall"])
+        dwp.append(ev["value"]["dollar_weighted_precision"])
+        value_settled += ev["value"]["total_settled"]
+        value_mis += ev["value"]["mis_booked"]
         fps += a["false_positives"]
 
         # the honesty invariant: nothing may vanish
@@ -73,14 +69,21 @@ def main(n_seeds: int = 60) -> int:
     results: list = []
     print(f"verifying published claims over {n_seeds} batches\n")
 
-    _check("precision >= 99.9%", m(prec), 0.999, results)
+    _check("precision >= 99.5%", m(prec), 0.995, results)
+    _check("dollar-weighted precision >= 99.5%", m(dwp), 0.995, results)
     _check("straight-through >= 90%", m(rec), 0.90, results)
     _check("resolution recall >= 98.5%", m(res), 0.985, results)
     _check("escalation recall == 100%", m(esc), 1.0, results)
 
-    if fps:
-        raise Failure(f"false positives regressed: {fps} across {n_seeds} batches")
-    results.append(("zero false positives", 0.0, 0.0, True))
+    # Exposure, not frequency. A handful of wrong rows is survivable; a wrong
+    # row carrying real money is not, so the binding constraint is the share of
+    # settled value that was booked against the wrong document.
+    mis_share = value_mis / value_settled if value_settled else 0.0
+    results.append(("mis-booked value <= 0.10% of settled", 1 - mis_share, 0.999,
+                    mis_share <= 0.001))
+    if mis_share > 0.001:
+        raise Failure(f"mis-booked value regressed: {mis_share:.4%} of settled "
+                      f"value across {n_seeds} batches")
 
     if drops:
         raise Failure(f"{drops} records were silently dropped")

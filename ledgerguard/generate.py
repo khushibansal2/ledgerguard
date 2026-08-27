@@ -250,6 +250,73 @@ def generate(seed: int = 20260827) -> Batch:
     b.orphan([bill.id, bk.id], "AMOUNT_VARIANCE_UNEXPLAINED",
              "Settlement exceeds bill by $80.00 with no fee, tax or FX basis.")
 
+    # ---- CASE 9: instalments - one bill cleared by several payments ---------
+    # The mirror image of a split remittance, and the harder direction: the
+    # engine must recognise that no single settlement will ever tie out, and
+    # that the *set* of them does.
+    for _ in range(3):
+        canon, aliases = rng.choice(VENDORS)
+        total = money(rng.choice([10000, 24000, 15600]))
+        d0 = base + timedelta(days=rng.randint(2, 12))
+        bill = b.add(Record(nid("bill"), "ERP_AP", "LEDGER", iso(d0), -total, "USD",
+                            f"Bill from {canon}", canon, ref("INV"),
+                            iso(d0 + timedelta(days=45)), "BILL"))
+        first = int(total * rng.choice([0.6, 0.5, 0.75]))
+        parts = [first, total - first]
+        pay_ids = []
+        for n, part in enumerate(parts):
+            bk = b.add(Record(nid("bank"), "BANK", "SETTLEMENT",
+                              iso(d0 + timedelta(days=6 + n * 11)), -part, "USD",
+                              f"ACH DEBIT {rng.choice(aliases)} INSTALMENT {n + 1}/2",
+                              rng.choice(aliases), "", None, "TRANSFER"))
+            pay_ids.append(bk.id)
+        b.link(pay_ids, [bill.id], "instalment_settlement")
+
+    # ---- CASE 10: failed payment, reversed, then re-sent --------------------
+    # Three bank lines for one economic event. Booking the reversal against the
+    # bill would understate the expense; missing the pair double-counts it.
+    for _ in range(2):
+        canon, aliases = rng.choice(VENDORS)
+        amt = money(rng.choice([8000, 3450, 11200]))
+        d0 = base + timedelta(days=rng.randint(4, 16))
+        bill = b.add(Record(nid("bill"), "ERP_AP", "LEDGER", iso(d0), -amt, "USD",
+                            f"Bill from {canon}", canon, ref("INV"),
+                            iso(d0 + timedelta(days=30)), "BILL"))
+        alias = rng.choice(aliases)
+        out = b.add(Record(nid("bank"), "BANK", "SETTLEMENT",
+                           iso(d0 + timedelta(days=1)), -amt, "USD",
+                           f"ACH DEBIT {alias}", alias, "", None, "TRANSFER"))
+        rev = b.add(Record(nid("bank"), "BANK", "SETTLEMENT",
+                           iso(d0 + timedelta(days=3)), amt, "USD",
+                           f"ACH RETURN R01 {alias} INSUFFICIENT FUNDS",
+                           alias, "", None, "REVERSAL"))
+        again = b.add(Record(nid("bank"), "BANK", "SETTLEMENT",
+                             iso(d0 + timedelta(days=5)), -amt, "USD",
+                             f"ACH DEBIT {alias} REPRESENTED", alias, "", None, "TRANSFER"))
+        b.link([out.id, rev.id], [], "payment_reversal_pair")
+        b.link([again.id], [bill.id], "represented_payment")
+
+    # ---- CASE 11: customer chargeback claws a settled invoice back ----------
+    # Same mechanism as a reversal, opposite side of the book: the pair nets to
+    # nothing and the receivable must go *back* to open rather than stay closed.
+    for _ in range(2):
+        cust = rng.choice(CUSTOMERS)
+        amt = money(rng.choice([5000, 12500]))
+        d0 = base + timedelta(days=rng.randint(6, 18))
+        inv = b.add(Record(nid("inv"), "ERP_AR", "LEDGER", iso(d0), amt, "USD",
+                           f"Invoice to {cust}", cust, ref("AR"),
+                           iso(d0 + timedelta(days=30)), "INVOICE", {"open": True}))
+        chg = b.add(Record(nid("stp"), "STRIPE", "SETTLEMENT",
+                           iso(d0 + timedelta(days=2)), amt, "USD",
+                           f"STRIPE PAYMENT {cust}", cust, "", None, "CHARGE"))
+        cb = b.add(Record(nid("stp"), "STRIPE", "SETTLEMENT",
+                          iso(d0 + timedelta(days=9)), -amt, "USD",
+                          f"STRIPE CHARGEBACK dispute_{rng.randint(10 ** 6, 10 ** 7)} {cust}",
+                          cust, "", None, "REVERSAL"))
+        b.link([chg.id, cb.id], [], "chargeback_pair")
+        b.orphan([inv.id], "OPEN_RECEIVABLE",
+                 "Settled then charged back; the receivable is open again.")
+
     # ---- open AR feeding the forecast (not part of reconciliation truth) ----
     for _ in range(6):
         cust = rng.choice(CUSTOMERS)

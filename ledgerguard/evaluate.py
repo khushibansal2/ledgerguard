@@ -79,7 +79,18 @@ def evaluate(batch: Batch, ctrl: Controller) -> dict[str, Any]:
         elif sid in truth_by_settlement:
             exp_key = truth_by_settlement[sid][0]
             rec["expected_ledger"] = list(exp_key[1])
-            if economically_identical(m.ledger_ids, list(exp_key[1])):
+            same_ledger = (set(m.ledger_ids) == set(exp_key[1])
+                           or economically_identical(m.ledger_ids, list(exp_key[1])))
+            # The settlement side needs the same treatment as the document side.
+            # Two identical charge/chargeback groups for one customer can be
+            # cross-paired; every pairing nets to zero against the same customer
+            # for the same amount in the same period, so the ledger is byte-for-
+            # byte the same and only the labels differ.
+            if same_ledger and economically_identical(m.settlement_ids, list(exp_key[0])):
+                rec["note"] = "different lines, identical posting (indistinguishable pair)"
+                equivalent.append(rec)
+                tp.append(rec)
+            elif economically_identical(m.ledger_ids, list(exp_key[1])):
                 rec["note"] = "different document, identical posting (closed cohort)"
                 equivalent.append(rec)
                 tp.append(rec)
@@ -113,6 +124,21 @@ def evaluate(batch: Batch, ctrl: Controller) -> dict[str, Any]:
     truly_missed = [{"settlement": t["settlement"], "ledger": t["ledger"], "case": t["case"]}
                     for t in batch.truth
                     if not set(t["settlement"]) & resolved_settlements]
+
+    # --- dollar-weighted view ------------------------------------------------
+    # Row counts hide the thing a controller is actually accountable for. Ten
+    # thousand correct $10 matches and one wrong $500,000 match is 99.99%
+    # precision and a catastrophe, so exposure is measured alongside frequency.
+    def value(ids: list[str]) -> int:
+        return sum(abs(ctrl.by_id[i].amount) for i in ids
+                   if i in ctrl.by_id and ctrl.by_id[i].side == "SETTLEMENT")
+
+    value_correct = sum(value(r["settlement"]) for r in tp)
+    value_mis_booked = sum(value(r["settlement"]) for r in fp)
+    value_partial = sum(value(r["settlement"]) for r in partial)
+    value_held = sum(value(m.settlement_ids) for m in ctrl.escalated)
+    value_booked = value_correct + value_mis_booked + value_partial
+    value_total = sum(abs(r.amount) for r in ctrl.settlements)
 
     # --- exception quality: did we escalate the right things? ---------------
     flagged_ids = {i for e in ctrl.exceptions for i in e.record_ids}
@@ -174,7 +200,22 @@ def evaluate(batch: Batch, ctrl: Controller) -> dict[str, Any]:
             "cohort_equivalent": len(equivalent),
             "missed": len(missed), "unresolved": len(truly_missed),
             "held_correct": len(held_correct), "held_wrong": len(held_wrong),
-            "straight_through_rate": n_booked / len(ctrl.settlements) if ctrl.settlements else 0.0,
+            # Count settlement events cleared, not matches booked. A reversal
+            # pair or an instalment group clears several events in one booking,
+            # so dividing bookings by events would understate automation purely
+            # because the engine got better at grouping.
+            "straight_through_rate": (len(booked_settlements) / len(ctrl.settlements)
+                                      if ctrl.settlements else 0.0),
+        },
+        "value": {
+            "total_settled": value_total,
+            "correctly_booked": value_correct,
+            "mis_booked": value_mis_booked,
+            "partially_booked": value_partial,
+            "held_for_review": value_held,
+            "dollar_weighted_precision": (value_correct / value_booked
+                                          if value_booked else 1.0),
+            "share_auto_booked": value_booked / value_total if value_total else 0.0,
         },
         "exception_quality": {
             "should_escalate": len(unmatchable_ids),

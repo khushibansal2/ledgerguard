@@ -92,6 +92,40 @@ class CashForecast:
             out[label] = [{"bucket": k, **buckets[k]} for k in order if k in buckets]
         return out
 
+    # -- what the close actually changed ------------------------------------
+    def reconciliation_impact(self) -> dict[str, Any]:
+        """Quantify the double-count that reconciling removed.
+
+        This is the join between the two loops, and the reason the close has to
+        happen before the forecast rather than beside it. An unreconciled book
+        counts settled invoices twice: once as cash already in the bank, and
+        again as a receivable still expected to arrive. Forecasting off it
+        overstates next month's inflow by exactly the value of everything that
+        has already been paid.
+
+        Reporting the delta turns reconciliation from housekeeping into a number
+        the treasurer cares about - this is how much the forecast moved, and why.
+        """
+        settled_ar = [r for r in self.c.ledger
+                      if r.id in self.c.consumed and r.amount > 0
+                      and r.doc_type == "INVOICE"]
+        settled_ap = [r for r in self.c.ledger
+                      if r.id in self.c.consumed and r.amount < 0
+                      and r.doc_type == "BILL"]
+        overstated_in = sum(r.amount for r in settled_ar)
+        overstated_out = sum(r.amount for r in settled_ap)
+
+        _ap, ar = self._open_items()
+        return {
+            "receivables_already_settled": overstated_in,
+            "payables_already_settled": overstated_out,
+            "naive_forecast_error": overstated_in + overstated_out,
+            "receivables_after_close": sum(r.amount for r in ar),
+            "documents_cleared": len(settled_ar) + len(settled_ap),
+            # what a forecast built on the raw ledger would have claimed
+            "naive_expected_inflow": sum(r.amount for r in ar) + overstated_in,
+        }
+
     # -- forward projection -------------------------------------------------
     def project(self, horizon_days: int = 30) -> dict[str, Any]:
         """Weekly buckets with an expected case and a confidence band.

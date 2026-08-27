@@ -71,7 +71,11 @@ class Resolver:
                 f"counterparty above the {CANDIDATE_FLOOR:.2f} identity threshold.",
                 "Investigate against card/vendor master; possible unrecorded expense "
                 "or unauthorised debit.",
-                s.amount, s.currency, {"description": s.description})
+                s.amount, s.currency, {"description": s.description},
+                missing_evidence=(
+                    "A vendor-master entry mapping the descriptor "
+                    f"'{s.description}' to a known counterparty, or the invoice "
+                    "itself if this expense was never entered."))
             return oc
 
         plan = self.planner.plan(s, cands)
@@ -79,6 +83,7 @@ class Resolver:
                           planner=type(self.planner).__name__)
 
         attempted: list[str] = []
+        winner: tuple[str, Match] | None = None
         for hypothesis in plan:
             fn = getattr(self, f"_try_{hypothesis}", None)
             if fn is None:
@@ -88,9 +93,31 @@ class Resolver:
             oc.tool_calls += calls
             self.c.audit.emit("L3_HYPOTHESIS", settlement=s.id,
                               hypothesis=hypothesis, accepted=bool(m), evidence=ev)
-            if m:
-                oc.match = m
+            if not m:
+                continue
+            if winner is None:
+                winner = (hypothesis, m)
+                # Allocation hypotheses are the ones that can both be true of the
+                # same figures - a vendor running a short-payment and an
+                # instalment plan at once produces two groupings that each
+                # balance to the cent. Keep testing rather than taking the first.
+                if hypothesis not in ("split", "instalment"):
+                    break
+                continue
+            if set(m.ledger_ids) != set(winner[1].ledger_ids):
+                # Two arithmetically closed readings, different documents. The
+                # bank file cannot say which is real, and booking either would
+                # be a coin flip dressed as a reconciliation.
+                self.c.audit.emit("AMBIGUITY_DETECTED", settlement=s.id,
+                                  competing=[winner[0], hypothesis],
+                                  option_a=winner[1].ledger_ids,
+                                  option_b=m.ledger_ids)
+                oc.exception = self._ambiguous(s, winner, (hypothesis, m))
                 return oc
+
+        if winner:
+            oc.match = winner[1]
+            return oc
 
         oc.exception = self._diagnose(s, cands, attempted)
         return oc
@@ -123,7 +150,7 @@ class Resolver:
                                 f"{fmt(fee['fee'])} is an unbooked "
                                 f"{fee['fee_model'].replace('_', ' ').lower()} charge. "
                                 f"Post the fee to bank charges, not to the vendor.",
-                                {"fx": r, "fee": fee}), calls, {"fee": fee}
+                                {"fx": r, "fee": fee}), calls, {"fx": r, "fee": fee}
         return None, calls, {"reason": "no foreign-currency candidate reconciles"}
 
     def _try_fee(self, s: Record, cands: list[Record]):
@@ -180,6 +207,55 @@ class Resolver:
                              "competing_candidates": len(hits) - 1}), calls, {"tax": t}
         return None, calls, {"reason": "no statutory rate reconciles a candidate"}
 
+    def _try_instalment(self, s: Record, cands: list[Record]):
+        """Several payments clearing one bill - the mirror of a split remittance.
+
+        Harder than a split, because no single settlement will ever tie out and
+        the evidence for the grouping is weaker: any two payments to a vendor
+        can be added together. The search is therefore anchored on the
+        settlement in hand, capped at four terms, and confidence is set below
+        the split case because a coincidental sum is easier to find on the
+        payment side than on the document side.
+        """
+        siblings = [x for x in self.c.settlements
+                    if x.id not in self.c.consumed
+                    and x.currency == s.currency
+                    and (x.amount > 0) == (s.amount > 0)
+                    and counterparty_score(s.counterparty or s.description,
+                                           x.counterparty or x.description) >= 0.88]
+        if len(siblings) < 2:
+            return None, 0, {"reason": "no sibling settlement to the same party"}
+
+        calls = 0
+        for l in cands:
+            if l.currency != s.currency or abs(l.amount) <= abs(s.amount):
+                continue
+            r = tools.subset_sum_including(siblings, l.amount, s.id)
+            calls += 1
+            if not r["ok"]:
+                continue
+            pays = [self.c.by_id[i] for i in r["ids"]]
+            # You cannot pay an instalment against a bill that does not exist
+            # yet. Without this the search happily assembles payments that
+            # straddle the invoice date and produces a group that balances but
+            # never happened.
+            if any(p.txn_date < l.txn_date for p in pays):
+                continue
+            lines = ", ".join(f"{p.id} {fmt(p.amount, p.currency)} on {p.txn_date}"
+                              for p in pays)
+            conf = 0.88 if len(pays) == 2 else 0.84
+            m = Match(self.c._next_mid(), [p.id for p in pays], [l.id],
+                      round(conf, 4), "L3_AGENTIC",
+                      f"{l.id} for {fmt(abs(l.amount), l.currency)} is cleared by "
+                      f"{len(pays)} instalments rather than one payment: {lines}. "
+                      f"Together they settle the bill exactly; individually none "
+                      f"of them ties out, which is why no earlier layer could "
+                      f"match them.",
+                      {"instalments": r, "bill": l.id}, r["residual"],
+                      ["subset_sum_including"])
+            return m, calls, r
+        return None, calls, {"reason": "no bill is cleared by a group including this payment"}
+
     def _try_split(self, s: Record, cands: list[Record]):
         """One remittance against several documents - including short-pays,
         where a credit note carries the opposite sign and nets down the bill."""
@@ -205,6 +281,31 @@ class Resolver:
                         f"only subset that closes.",
                         {"subset_sum": r, "credit_note_applied": has_credit}), 1, r
 
+    def _ambiguous(self, s: Record, a: tuple[str, Match],
+                   b: tuple[str, Match]) -> Exception_:
+        """Refuse a settlement that has more than one true-looking allocation."""
+        def describe(name: str, m: Match) -> str:
+            docs = ", ".join(f"{i} {fmt(self.c.by_id[i].amount, self.c.by_id[i].currency)}"
+                             for i in m.ledger_ids)
+            return f"{name}: {docs}"
+
+        return Exception_(
+            [s.id] + sorted(set(a[1].ledger_ids) | set(b[1].ledger_ids)),
+            "AMBIGUOUS_ALLOCATION", "MEDIUM",
+            f"{fmt(abs(s.amount), s.currency)} settled on {s.txn_date} for "
+            f"'{s.counterparty}' can be allocated two ways, both closing to the "
+            f"cent - {describe(*a)}; {describe(*b)}. The arithmetic cannot "
+            f"choose between them and neither can this engine.",
+            "Obtain the remittance advice and allocate manually; the correct "
+            "answer exists but is not present in the source records.",
+            s.amount, s.currency,
+            {"option_a": {"hypothesis": a[0], "ledger": a[1].ledger_ids},
+             "option_b": {"hypothesis": b[0], "ledger": b[1].ledger_ids}},
+            missing_evidence=(
+                "Remittance advice showing which invoices this payment was "
+                "applied to. Both allocations balance, so no amount, date or "
+                "vendor field in the current data can separate them."))
+
     # -- refusal -----------------------------------------------------------
     def _diagnose(self, s: Record, cands: list[Record], attempted: list[str]) -> Exception_:
         near = min(cands, key=lambda l: abs(abs(l.amount) - abs(s.amount)))
@@ -225,7 +326,12 @@ class Resolver:
             s.amount, s.currency,
             {"nearest_candidate": near.id, "variance": gap, "variance_pct": round(pct, 3),
              "hypotheses_rejected": attempted,
-             "other_candidates": [c.id for c in cands[:5]]})
+             "other_candidates": [c.id for c in cands[:5]]},
+            missing_evidence=(
+                f"A remittance advice for the {fmt(abs(s.amount), s.currency)} "
+                f"payment, or a vendor statement showing what the extra "
+                f"{fmt(abs(gap))} was for - a credit, a rebilled cost or an "
+                f"error. Nothing in the current records distinguishes these."))
 
     # -- construction ------------------------------------------------------
     def _mk(self, s: Record, docs: list[Record], conf: float, layer: str,
@@ -254,7 +360,14 @@ class HeuristicPlanner:
             plan.append("fee")          # settled less than billed -> deduction
         if smaller:
             plan.append("tax")          # settled more than billed -> add-on
+        # Split before instalment, always. Both can close on the same figures
+        # when a vendor has a short-payment and an instalment plan running at
+        # once, but a split is evidenced entirely by documents already on the
+        # book, whereas an instalment additionally assumes that other payments
+        # belong to this one. Prefer the reading that assumes less.
         plan.append("split")
+        if larger:
+            plan.append("instalment")
         return plan
 
 
@@ -308,7 +421,7 @@ class LLMPlanner:
                 messages=[{"role": "user", "content": prompt}])
             text = resp.content[0].text.strip()
             text = text[text.index("["):text.rindex("]") + 1]
-            got = [h for h in json.loads(text) if h in {"fx", "fee", "tax", "split"}]
+            got = [h for h in json.loads(text) if h in {"fx", "fee", "tax", "split", "instalment"}]
             return got or self.fallback.plan(s, cands)
         except Exception:
             return self.fallback.plan(s, cands)

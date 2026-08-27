@@ -28,23 +28,56 @@ from . import tools
 
 @dataclass
 class Policy:
-    """Risk-weighted autonomy. Confidence alone is a bad gate: an 0.80 match on
-    $80 and an 0.80 match on $80,000 carry very different downside, so the bar
-    rises with materiality."""
-    auto_book_min: float = 0.75
-    material_amount: int = 500_000          # $5,000 in cents
-    material_min_confidence: float = 0.88
+    """Risk-weighted autonomy: the confidence required rises with the money.
+
+    Confidence alone is a bad gate. An 0.80 match on $80 and an 0.80 match on
+    $800,000 carry the same probability of being wrong and wildly different
+    consequences, so a single threshold is either too loose at the top of the
+    book or too strict at the bottom - and a controller who is made to approve
+    trivia stops reading the queue, which is its own failure mode.
+
+    The ladder below is expressed the way a delegated-authority matrix already
+    is in a real finance function, so it can be handed to an auditor as policy
+    rather than as a tuning constant.
+    """
+    # (threshold in minor units, confidence required at or above it)
+    # Calibrated against the confidence the evidence layers actually produce
+    # (see ablate.py): each rung is set to hold roughly the least-evidenced
+    # tenth of its band rather than a quarter of it. A gate that holds a
+    # quarter of the material book is not prudence, it is a controller who
+    # stops reading the queue by Wednesday.
+    ladder: tuple[tuple[int, float], ...] = (
+        (0,           0.75),   # under $1,000  - routine
+        (100_000,     0.82),   # $1,000+       - reviewable
+        (1_000_000,   0.90),   # $10,000+      - material
+        (10_000_000,  0.96),   # $100,000+     - significant; near-certainty only
+    )
     max_residual: int = 2                   # cents of unexplained difference
+
+    def required_confidence(self, amount: int) -> float:
+        req = self.ladder[0][1]
+        for threshold, needed in self.ladder:
+            if abs(amount) >= threshold:
+                req = needed
+        return req
+
+    def band(self, amount: int) -> str:
+        names = ["routine", "reviewable", "material", "significant"]
+        idx = 0
+        for i, (threshold, _n) in enumerate(self.ladder):
+            if abs(amount) >= threshold:
+                idx = i
+        return names[idx]
 
     def gate(self, m: Match, amount: int) -> tuple[bool, str]:
         if abs(m.residual) > self.max_residual:
             return False, f"unexplained residual {fmt(abs(m.residual))} exceeds tolerance"
-        if m.confidence < self.auto_book_min:
-            return False, f"confidence {m.confidence:.2f} below auto-book floor {self.auto_book_min:.2f}"
-        if abs(amount) >= self.material_amount and m.confidence < self.material_min_confidence:
-            return False, (f"material item {fmt(abs(amount))} at confidence "
-                           f"{m.confidence:.2f} requires >= {self.material_min_confidence:.2f}")
-        return True, "within policy"
+        req = self.required_confidence(amount)
+        if m.confidence < req:
+            return False, (f"{self.band(amount)} item {fmt(abs(amount))} at confidence "
+                           f"{m.confidence:.2f} requires >= {req:.2f}")
+        return True, (f"within policy: {self.band(amount)} item needs "
+                      f"{req:.2f}, has {m.confidence:.2f}")
 
 
 class Controller:
@@ -70,7 +103,7 @@ class Controller:
         self.matches: list[Match] = []
         self.exceptions: list[Exception_] = []
         self.escalated: list[Match] = []    # resolved, but held for human sign-off
-        self.stats = {"L1": 0, "L2": 0, "L3": 0, "tool_calls": 0}
+        self.stats = {"L0": 0, "L1": 0, "L2": 0, "L3": 0, "tool_calls": 0}
         self._mid = 0
 
     # -- helpers -----------------------------------------------------------
@@ -80,6 +113,17 @@ class Controller:
 
     def _open_ledger(self) -> list[Record]:
         return [r for r in self.ledger if r.id not in self.consumed]
+
+    def _open_settlements(self) -> list[Record]:
+        """Unconsumed settlements that could genuinely settle a document.
+
+        A line the rail typed as a reversal is money coming back, never a
+        payment against an invoice. If L0 could not pair it, the honest outcome
+        is an exception - letting it reach the similarity or resolver layers
+        would close an invoice that is in fact still open.
+        """
+        return [r for r in self.settlements
+                if r.id not in self.consumed and r.doc_type != "REVERSAL"]
 
     def _book(self, m: Match, driver: Record) -> None:
         ok, why = self.policy.gate(m, driver.amount)
@@ -102,7 +146,11 @@ class Controller:
                 reason=f"Resolved at {m.layer} but held: {why}",
                 suggested_action="Controller review; approve to book as proposed.",
                 amount=driver.amount, currency=driver.currency,
-                evidence={"proposed": m.to_dict()}))
+                evidence={"proposed": m.to_dict()},
+                missing_evidence=(
+                    "None - the match is fully evidenced. This is a delegated-"
+                    "authority hold, not an unresolved item: a controller "
+                    "signature is the only thing required.")))
             self.audit.emit("MATCH_HELD", match_id=m.match_id, policy=why)
 
     def _flag(self, exc: Exception_) -> None:
@@ -110,6 +158,71 @@ class Controller:
         self.audit.emit("EXCEPTION_RAISED", category=exc.category,
                         severity=exc.severity, records=exc.record_ids,
                         reason=exc.reason, action=exc.suggested_action)
+
+    # -- LAYER 0 -----------------------------------------------------------
+    def layer0_reversals(self) -> None:
+        """Cancel equal-and-opposite settlement pairs before anything else runs.
+
+        A returned ACH, a re-presented payment and a chargeback all produce bank
+        lines that look exactly like real settlements. Left in the pool they do
+        damage in both directions: the reversal can be booked against an open
+        bill (understating the expense), or the original can be matched while
+        its reversal is left to sit in the exception queue forever.
+
+        Neither line settles a document, so this pass books them against *each
+        other* - an economically closed event with no ledger entry. It runs
+        first because every later layer assumes the settlements it sees are real
+        movements of money.
+        """
+        pool = [s for s in self.settlements if s.id not in self.consumed]
+        used: set[str] = set()
+
+        # Work from the reversal outwards. The reversal is the line the rail
+        # explicitly typed, so it is the fact; the payment it cancels is the
+        # thing to be inferred.
+        for rev in [r for r in pool if r.doc_type == "REVERSAL"]:
+            if rev.id in used:
+                continue
+            # Direction matters: money can only be given back after it was
+            # taken. A failed payment is normally re-presented, leaving three
+            # same-value lines - original, return, retry - and the return
+            # offsets either negative line arithmetically. Restricting to
+            # earlier lines stops the pass cancelling the retry and leaving the
+            # original to be booked a second time.
+            partners = [
+                p for p in pool
+                if p.id not in used and p.id != rev.id
+                and p.doc_type != "REVERSAL"
+                and p.amount == -rev.amount and p.currency == rev.currency
+                and p.d <= rev.d and (rev.d - p.d).days <= 30
+                and counterparty_score(p.counterparty, rev.counterparty) >= 0.90
+            ]
+            if not partners:
+                continue
+            if len(partners) > 1:
+                # Two payments of the same value to the same vendor before the
+                # same return. Refusing here would be worse than choosing: the
+                # reversal is certainly cancelling one of them, and leaving it
+                # unpaired lets a return be booked against an invoice later.
+                # Take the nearest preceding payment - the convention a bank
+                # applies, and economically identical when the amounts match.
+                self.audit.emit("AMBIGUITY_DETECTED", settlement=rev.id,
+                                candidates=[p.id for p in partners],
+                                resolution="nearest preceding payment")
+            partners.sort(key=lambda p: (p.txn_date, p.id), reverse=True)
+            a = partners[0]
+            used.update({a.id, rev.id})
+            gap = (rev.d - a.d).days
+            kind = ("chargeback" if "CHARGEBACK" in (a.description + rev.description).upper()
+                    else "returned payment")
+            self._book(Match(
+                self._next_mid(), [a.id, rev.id], [], 0.98, "L0_REVERSAL",
+                f"{fmt(abs(a.amount), a.currency)} {kind} for "
+                f"'{a.counterparty}': the settlement on {a.txn_date} was "
+                f"reversed on {rev.txn_date}, {gap} days later. The pair nets to "
+                f"zero and settles no document - booking either line against a "
+                f"ledger entry would misstate the period.",
+                {"pair": [a.id, rev.id], "gap_days": gap, "kind": kind}), a)
 
     # -- LAYER 1 -----------------------------------------------------------
     def layer1(self) -> None:
@@ -119,7 +232,7 @@ class Controller:
             if r.reference:
                 by_ref.setdefault((r.reference.upper(), r.amount, r.currency), []).append(r)
 
-        for s in self.settlements:
+        for s in self._open_settlements():
             if s.id in self.consumed or not s.reference:
                 continue
             key = (s.reference.upper(), s.amount, s.currency)
@@ -188,8 +301,8 @@ class Controller:
                 # references separate them; let L1/L2 use that evidence instead
                 if not all(d.reference for d in docs):
                     continue
-            setts = [s for s in self.settlements
-                     if s.id not in self.consumed and s.amount == amount
+            setts = [s for s in self._open_settlements()
+                     if s.amount == amount
                      and s.currency == currency and not s.reference
                      and counterparty_score(s.counterparty or s.description,
                                             docs[0].counterparty) >= 0.90]
@@ -222,7 +335,7 @@ class Controller:
         """
         scored: list[tuple[float, Record, Record, dict]] = []
         runner_up: dict[str, float] = {}
-        for s in self.settlements:
+        for s in self._open_settlements():
             if s.id in self.consumed:
                 continue
             per_settlement: list[tuple[float, Record, dict]] = []
@@ -278,7 +391,10 @@ class Controller:
         """Amount does not tie out. Prove the difference or escalate it."""
         from .agent import Resolver
         resolver = Resolver(self, planner=self.planner)
-        for s in self.settlements:
+        for s in self._open_settlements():
+            # The list above is a snapshot. An instalment match consumes several
+            # settlements at once, so by the time the loop reaches one of them it
+            # may already be booked - re-check rather than resolve it twice.
             if s.id in self.consumed:
                 continue
             outcome = resolver.resolve(s)
@@ -290,6 +406,28 @@ class Controller:
 
     # -- sweep unresolved ledger docs --------------------------------------
     def sweep(self, as_of: str) -> None:
+        # Reversals that never found the payment they cancel. They are excluded
+        # from every matching layer by design, so without this they would be the
+        # one class of record that vanishes silently - the exact failure the
+        # exception ledger exists to prevent.
+        for r in self.settlements:
+            if r.id in self.consumed or r.doc_type != "REVERSAL":
+                continue
+            self._flag(Exception_(
+                [r.id], "UNPAIRED_REVERSAL", "HIGH",
+                f"{fmt(abs(r.amount), r.currency)} returned on {r.txn_date} "
+                f"('{r.description}') but no matching outbound payment to "
+                f"'{r.counterparty}' was found in the period. Either the original "
+                f"sits outside this window or the amounts disagree.",
+                "Trace the original payment before closing; an unmatched reversal "
+                "means either cash was returned that was never recorded as sent, "
+                "or the original is still overstating the period.",
+                r.amount, r.currency, {"doc_type": r.doc_type},
+                missing_evidence=(
+                    "The prior-period bank statement containing the original "
+                    "payment, or the rail's return-reason reference tying this "
+                    "credit to the debit it reverses.")))
+
         dupes = tools.duplicate_scan(self.records)
         self.stats["tool_calls"] += 1
         dupe_ids = {i for d in dupes for i in d["ids"]}
@@ -305,7 +443,11 @@ class Controller:
                     f"but only one settlement was found. Paying both would be a "
                     f"{fmt(abs(l.amount), l.currency)} overpayment.",
                     "Block for payment; confirm with vendor and void the duplicate.",
-                    l.amount, l.currency, {"sibling_ids": d["ids"]}))
+                    l.amount, l.currency, {"sibling_ids": d["ids"]},
+                    missing_evidence=(
+                        "Confirmation from the vendor that reference "
+                        f"{d['reference']} was issued once. If both are genuine, "
+                        "a second settlement should exist and does not.")))
                 continue
 
             open_kind = "OPEN_RECEIVABLE" if l.amount > 0 else "OPEN_PAYABLE"
@@ -319,13 +461,19 @@ class Controller:
                     if l.due_date else ".")),
                 ("Chase the counterparty; ageing bucket feeds the cash forecast."
                  if not overdue else "Overdue - escalate to collections/AP run."),
-                l.amount, l.currency, {"doc_type": l.doc_type, "overdue": overdue}))
+                l.amount, l.currency, {"doc_type": l.doc_type, "overdue": overdue},
+                missing_evidence=(
+                    "None - this is an open item, not a failure. It resolves "
+                    "when the counterparty pays; until then it is carried in "
+                    "the forecast at its ageing-adjusted value.")))
 
     # -- orchestration -----------------------------------------------------
     def run(self, as_of: str = "2026-04-05") -> "Controller":
         self.audit.emit("RUN_START", records=len(self.records),
                         settlements=len(self.settlements), ledger=len(self.ledger),
                         policy=self.policy.__dict__, as_of=as_of)
+        self.audit.emit("LAYER_START", layer="L0_REVERSAL")
+        self.layer0_reversals()
         self.audit.emit("LAYER_START", layer="L1_DETERMINISTIC")
         self.layer1()
         self.audit.emit("LAYER_START", layer="L2_COHORT")

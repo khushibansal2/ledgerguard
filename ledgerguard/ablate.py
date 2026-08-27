@@ -64,9 +64,14 @@ class NaiveAmountDateMatcher(Controller):
 
 
 class NoL3(Controller):
-    """Deterministic layers only - no tool-using resolver."""
+    """Deterministic layers only - no tool-using resolver.
+
+    Keeps the reversal pass, so what this isolates is the resolver's
+    contribution and nothing else.
+    """
 
     def run(self, as_of: str = "2026-04-05") -> "NoL3":
+        self.layer0_reversals()
         self.layer1()
         self.layer2_cohorts()
         self.layer2()
@@ -78,7 +83,25 @@ class NoCohort(Controller):
     """Full pipeline minus the closed-cohort pass."""
 
     def run(self, as_of: str = "2026-04-05") -> "NoCohort":
+        self.layer0_reversals()
         self.layer1()
+        self.layer2()
+        self.layer3()
+        self.sweep(as_of)
+        return self
+
+
+class NoReversalPass(Controller):
+    """Full pipeline minus L0, so returns and chargebacks stay in the pool.
+
+    The most expensive ablation in the set, and the least obvious: a returned
+    payment looks exactly like a real one, so without this pass the later
+    layers cheerfully book money coming *back* against an open invoice.
+    """
+
+    def run(self, as_of: str = "2026-04-05") -> "NoReversalPass":
+        self.layer1()
+        self.layer2_cohorts()
         self.layer2()
         self.layer3()
         self.sweep(as_of)
@@ -95,13 +118,16 @@ class NoPolicyGate(Controller):
 
     def __init__(self, *a, **kw) -> None:
         super().__init__(*a, **kw)
-        self.policy = Policy(auto_book_min=0.0, material_min_confidence=0.0,
-                             material_amount=10 ** 12)
+        # A single rung at zero confidence: every proposal books, whatever it
+        # is worth. This is the configuration the materiality ladder exists to
+        # prevent, kept runnable so its cost can be measured rather than argued.
+        self.policy = Policy(ladder=((0, 0.0),))
 
 
 CONFIGS: dict[str, tuple[type, str]] = {
     "naive: equal amount": (NaiveAmountMatcher, "baseline"),
     "naive: amount + 3d window": (NaiveAmountDateMatcher, "baseline"),
+    "no reversal pass": (NoReversalPass, "ablation"),
     "no L3 resolver": (NoL3, "ablation"),
     "no cohort pass": (NoCohort, "ablation"),
     "no policy gate": (NoPolicyGate, "ablation"),

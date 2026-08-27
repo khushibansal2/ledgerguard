@@ -1,47 +1,58 @@
 {
   "n_batches": 200,
-  "records": 22618,
-  "events": 9400,
-  "booked": 8230,
-  "held": 501,
-  "exceptions": 3439,
-  "precision_mean": 0.9992717258261934,
-  "precision_worst": 0.9473684210526315,
-  "recall_mean": 0.9345454545454546,
-  "recall_worst": 0.8181818181818182,
-  "resolution_mean": 0.9914772727272728,
-  "resolution_worst": 0.9318181818181818,
+  "records": 27218,
+  "events": 12600,
+  "booked": 9822,
+  "held": 694,
+  "exceptions": 4087,
+  "precision_mean": 0.9985829387346864,
+  "precision_worst": 0.9591836734693877,
+  "recall_mean": 0.9252830188679245,
+  "recall_worst": 0.8113207547169812,
+  "resolution_mean": 0.9903773584905661,
+  "resolution_worst": 0.9056603773584906,
   "escalation_mean": 1.0,
   "escalation_worst": 1.0,
-  "fp": 0,
-  "unresolved": 69,
-  "partial": 6,
-  "ms_mean": 95.68866300134687,
-  "rps": 1181.8536956505307,
-  "calls_per_event": 1.483936170212766,
+  "fp": 2,
+  "unresolved": 84,
+  "partial": 12,
+  "equivalent": 295,
+  "ms_mean": 147.4070714978734,
+  "rps": 923.2257219217827,
+  "calls_per_event": 1.4796825396825397,
+  "l3_share": 0.4357142857142857,
+  "pre_l3_share": 0.5642857142857143,
+  "dollar_weighted_precision": 0.9974179591985837,
+  "value_settled": 6319734723,
+  "value_mis_booked": 1200000,
+  "value_held": 922637705,
   "calibration": {
     "1.00-1.00": {
       "n": 3200,
       "acc": 1.0
     },
     "0.95-1.00": {
-      "n": 200,
+      "n": 1000,
       "acc": 1.0
     },
     "0.90-0.95": {
-      "n": 3375,
+      "n": 3385,
       "acc": 1.0
     },
     "0.85-0.90": {
-      "n": 769,
-      "acc": 0.9921976592977894
+      "n": 1298,
+      "acc": 0.9892141756548536
     },
     "0.00-0.85": {
-      "n": 686,
+      "n": 939,
       "acc": 1.0
     }
   },
   "by_case": {
+    "chargeback_pair": {
+      "total": 400,
+      "correct": 400
+    },
     "clean_1to1": {
       "total": 3200,
       "correct": 3200
@@ -54,13 +65,25 @@
       "total": 1000,
       "correct": 1000
     },
+    "instalment_settlement": {
+      "total": 600,
+      "correct": 310
+    },
+    "payment_reversal_pair": {
+      "total": 400,
+      "correct": 400
+    },
+    "represented_payment": {
+      "total": 400,
+      "correct": 221
+    },
     "short_pay_credit_note": {
       "total": 600,
-      "correct": 594
+      "correct": 589
     },
     "split_remittance": {
       "total": 800,
-      "correct": 566
+      "correct": 736
     },
     "stripe_gross_vs_net": {
       "total": 1000,
@@ -72,17 +95,18 @@
     },
     "timing_lag_cross_month": {
       "total": 1200,
-      "correct": 864
+      "correct": 952
     }
   },
   "layer_mix": {
+    "L0_REVERSAL": 800,
     "L1_DETERMINISTIC": 3400,
-    "L2_SIMILARITY": 864,
-    "L3_AGENTIC": 3966
+    "L2_SIMILARITY": 1173,
+    "L3_AGENTIC": 4449
   },
   "residual_failures": {
-    "timing_lag_cross_month": 69
-  },
-  "l3_share": 0.5179787234042553,
-  "pre_l3_share": 0.4820212765957447
+    "instalment_settlement": 13,
+    "timing_lag_cross_month": 69,
+    "short_pay_credit_note": 2
+  }
 }

@@ -117,6 +117,43 @@ def subset_sum(candidates: list[Record], target: int, max_terms: int = 4,
             "pool_size": len(pool)}
 
 
+def subset_sum_including(candidates: list[Record], target: int, must_include: str,
+                         max_terms: int = 4, tol: int = 2) -> dict[str, Any]:
+    """Subset search constrained to contain one specific record.
+
+    Used for instalments, where the question is not "do any payments add up to
+    this bill" - on a busy vendor account something usually does - but "does
+    *this* payment belong to a set that clears it". Anchoring the search to the
+    settlement in hand is what stops the engine assembling a plausible-looking
+    group that happens to balance while the payment it was asked about sits
+    unexplained.
+    """
+    anchor = next((c for c in candidates if c.id == must_include), None)
+    if anchor is None:
+        return {"ok": False, "error": "anchor not in candidate pool"}
+    others = sorted((c for c in candidates if c.id != must_include),
+                    key=lambda r: (r.txn_date, r.id))[:12]
+
+    for k in range(1, max_terms):
+        best = None
+        for combo in combinations(others, k):
+            group = (anchor,) + combo
+            diff = abs(sum(c.amount for c in group) - target)
+            if diff > tol:
+                continue
+            key = (diff, tuple(c.id for c in group))
+            if best is None or key < best[:2]:
+                best = (*key, group)
+        if best:
+            group = best[2]
+            return {"ok": True, "ids": [c.id for c in group],
+                    "sum": sum(c.amount for c in group), "terms": len(group),
+                    "residual": best[0], "searched": f"C({len(others)},{k})"}
+    return {"ok": False,
+            "error": f"no group of <= {max_terms} settlements including "
+                     f"{must_include} clears the target"}
+
+
 def duplicate_scan(records: list[Record]) -> list[dict[str, Any]]:
     """Same counterparty + reference + amount raised more than once."""
     seen: dict[tuple, list[str]] = {}
