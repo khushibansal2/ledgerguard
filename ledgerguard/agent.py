@@ -44,7 +44,7 @@ class Resolver:
         """Entity-first retrieval. Amount is useless as a filter here (that is
         precisely what failed at L1/L2), so identity and direction carry it."""
         out = []
-        for l in self.c._open_ledger():
+        for l in self.c.candidate_documents(s):
             if (l.amount > 0) != (s.amount > 0) and l.doc_type != "CREDIT_NOTE":
                 continue                              # never net a payable off a receipt
             cp = counterparty_score(s.counterparty or s.description, l.counterparty)

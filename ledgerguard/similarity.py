@@ -140,6 +140,28 @@ def despaced(s: str) -> str:
     return "".join(tokens(s)) or normalize(s).replace(" ", "")
 
 
+def block_key(s: str) -> frozenset[str]:
+    """Cheap blocking key for candidate generation.
+
+    Comparing every settlement against every open document is quadratic, and on
+    a real book that is the difference between a close that finishes and one
+    that does not. Blocking restricts comparisons to records that could
+    plausibly score, and the key has to be chosen so that *nothing this engine
+    would have matched* is excluded by it.
+
+    That rules out the obvious choice of shared tokens: bank descriptors
+    abbreviate to initialisms, and 'NW' shares no token with 'northwind'. What
+    they do share is the first letter, which is exactly the anchor
+    `abbreviation_score` already requires - so first letters are safe here for
+    the same reason they work there.
+    """
+    ts = tokens(s)
+    if not ts:
+        n = normalize(s).replace(" ", "")
+        return frozenset(n[:1]) if n else frozenset()
+    return frozenset(t[0] for t in ts)
+
+
 def counterparty_score(a: str, b: str) -> float:
     """Take the most optimistic of three views of the same pair.
 

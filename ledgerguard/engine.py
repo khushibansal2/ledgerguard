@@ -22,7 +22,8 @@ from dataclasses import dataclass
 
 from .audit import AuditLog
 from .models import Exception_, Match, Record, fmt
-from .similarity import amount_score, counterparty_score, date_score, reference_score
+from .similarity import (amount_score, block_key, counterparty_score,
+                         date_score, reference_score)
 from . import tools
 
 
@@ -99,6 +100,8 @@ class Controller:
         self.settlements = sorted((r for r in records if r.side == "SETTLEMENT"), key=order)
         self.ledger = sorted((r for r in records if r.side == "LEDGER"), key=order)
         self.consumed: set[str] = set()
+        self._index: dict[str, list[Record]] = {}
+        self._build_index()
 
         self.matches: list[Match] = []
         self.exceptions: list[Exception_] = []
@@ -113,6 +116,40 @@ class Controller:
 
     def _open_ledger(self) -> list[Record]:
         return [r for r in self.ledger if r.id not in self.consumed]
+
+    def candidate_documents(self, s: Record) -> list[Record]:
+        """Open ledger documents worth comparing against this settlement.
+
+        Blocking, not filtering: anything sharing an initial with the
+        counterparty is kept, which is a superset of what could ever score, so
+        the index costs speed and never recall. A settlement with no usable name
+        falls back to the full pool.
+
+        Served from an inverted index rather than a scan. Scanning the ledger
+        once per settlement is quadratic on its own no matter how good the
+        blocking predicate is - which is precisely what the scale harness
+        showed, and why the predicate alone did not bend the curve.
+        """
+        key = block_key(s.counterparty or s.description)
+        if not key:
+            return self._open_ledger()
+        seen: set[str] = set()
+        out: list[Record] = []
+        for letter in key:
+            for l in self._index.get(letter, ()):
+                if l.id in self.consumed or l.id in seen:
+                    continue
+                seen.add(l.id)
+                out.append(l)
+        out.sort(key=lambda r: (r.txn_date, r.id))
+        return out
+
+    def _build_index(self) -> None:
+        """Initial letter -> documents. Built once; consumption is filtered at
+        read time, which is cheaper than maintaining deletions."""
+        for l in self.ledger:
+            for letter in block_key(l.counterparty or l.description):
+                self._index.setdefault(letter, []).append(l)
 
     def _open_settlements(self) -> list[Record]:
         """Unconsumed settlements that could genuinely settle a document.
@@ -353,7 +390,7 @@ class Controller:
             if s.id in self.consumed:
                 continue
             per_settlement: list[tuple[float, Record, dict]] = []
-            for l in self._open_ledger():
+            for l in self.candidate_documents(s):
                 if l.currency != s.currency or l.amount != s.amount:
                     continue
                 cp = counterparty_score(s.counterparty or s.description, l.counterparty)

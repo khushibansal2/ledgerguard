@@ -21,6 +21,7 @@ python -m ledgerguard.cli --seeds 200     # robustness across 200 batches
 python -m ledgerguard.ablate              # does each layer earn its place?
 python -m ledgerguard.cli --csv work.csv  # exception worklist for the controller
 python -m ledgerguard.redteam             # can a hostile planner move the ledger?
+python -m ledgerguard.scale               # how does it behave as the book grows?
 python tests/test_controller.py           # 16 invariants, no pytest needed
 python -m ledgerguard.verify_claims       # re-verify every accuracy claim
 python -m ledgerguard.check_readme        # assert this README matches the run
@@ -180,6 +181,39 @@ batch ends up matched, held, or on the exception ledger. An engine that quietly
 ignores what it cannot handle looks more accurate than one that reports it —
 that test removes the incentive.
 
+## What happens as the book grows
+
+`python -m ledgerguard.scale` composes many batches into one book and measures
+where the curve bends. Accuracy holds; speed does not, and the README says so.
+
+With counterparty cardinality growing alongside the book — what actually happens
+as a company scales:
+
+| Records | Events | Seconds | Precision | Mis-booked |
+|---|---|---|---|---|
+| 138 | 63 | 0.12 | 100.00% | $0 |
+| 545 | 252 | 1.05 | 100.00% | $0 |
+| 1,090 | 504 | 4.09 | 100.00% | $0 |
+| 2,178 | 1,008 | 19.93 | 97.98% | $62,530 |
+
+Growth is **~n^1.9** — still quadratic. Adding a blocking index cut the constant
+by 4–9× but did not bend the curve, because L2 compares every open settlement
+against every open document in its block. **Extrapolated to 100,000 records that
+is roughly 6.7 hours, so this build is not production-scale as written.** The fix
+is stronger blocking on a vendor-master id, which a real ERP already has and this
+synthetic book does not.
+
+Running the same test with a *fixed* ten-vendor pool — so density rather than
+size grows — degrades precision to 95% at 2,178 records. That is the honest
+limit of the discrimination: when hundreds of same-vendor, same-amount documents
+compete for one payment, the evidence genuinely runs out.
+
+Both numbers were hard to measure correctly. Two earlier versions of this test
+were broken fixtures rather than results: namespacing record ids gave every
+record in the book the same initial and collapsed every block into one, and
+prefixing vendor names with a shared word made *different* vendors inside a
+batch more similar to each other. Both looked like algorithmic limits.
+
 ## The exception queue answers three questions
 
 Not just *what happened*, but *why the engine could not resolve it* and *what
@@ -231,6 +265,8 @@ must fund".
   does not contain — a judgement call, not a result these numbers support.
 - **The `significant` rung (>$100,000) is untested.** No settlement in this
   data reaches it.
+- **It is not production-scale.** ~n^1.9 growth; ~6.7 hours extrapolated to
+  100,000 records. Accuracy holds, throughput does not.
 - **Synthetic data is not production data.** FX curves, fee schedules and tax
   rates are frozen tables. Real books add partial-period cutoffs, multi-currency
   netting and intercompany elimination this build does not model.
@@ -270,6 +306,7 @@ ledgerguard/
   ablate.py       baselines and per-layer ablations
   trace.py        replay one decision from the audit trail
   redteam.py      hostile planners vs. the containment claim
+  scale.py        growth curve and the density limit
   report.py       HTML close report, generated from run output
   verify_claims.py  turns every accuracy claim into a build gate
   check_readme.py   asserts this README matches the committed run

@@ -44,6 +44,49 @@ CUSTOMERS = [
 
 ALIAS_OF = {v[0]: v[1] for v in VENDORS}
 
+# --- synthetic vendor universes, for scale testing --------------------------
+_HEADS = ["Cald", "Mor", "Vant", "Bris", "Tarn", "Quill", "Yarr", "Wren", "Fyfe",
+          "Ober", "Lark", "Pell", "Ashd", "Ryde", "Sten", "Gorse", "Ives",
+          "Nyle", "Umber", "Zeph", "Hald", "Jarn", "Kirk", "Dray", "Ember",
+          "Foss"]
+_TAILS = ["mont", "wick", "ford", "stead", "hollow", "gate", "bourne", "field",
+          "ridge", "combe"]
+_SUFFIX = ["Logistics", "Analytics", "Holdings", "Supply", "Systems",
+           "Partners", "Foods", "Metals", "Freight", "Studios"]
+_FORM = ["Inc", "LLC", "Ltd", "GmbH", "LLP", "Pvt Ltd"]
+
+
+def vendor_universe(n: int, seed: int = 7) -> list[tuple[str, list[str]]]:
+    """Build `n` distinct vendors with the same dirty-descriptor problems.
+
+    Scale tests need counterparty cardinality to grow with the book - a company
+    with 50,000 monthly settlements does not have ten suppliers. Reusing one
+    small pool measures density, not size, and the two have very different
+    answers.
+
+    Each generated vendor gets the same three descriptor pathologies the fixed
+    pool has (initialism, concatenation, truncation), so a larger universe is
+    not an easier one.
+    """
+    rng = random.Random(seed)
+    out: list[tuple[str, list[str]]] = []
+    seen: set[str] = set()
+    while len(out) < n:
+        head = _HEADS[len(out) % len(_HEADS)]
+        stem = head + rng.choice(_TAILS)
+        canon = f"{stem} {rng.choice(_SUFFIX)} {rng.choice(_FORM)}"
+        if canon in seen:
+            continue
+        seen.add(canon)
+        word = canon.split()[1]
+        aliases = [
+            f"{stem.upper()} {word[:6].upper()}",                 # truncated
+            f"{stem.upper()}{word.upper()}",                      # concatenated
+            f"{stem[0].upper()}{stem[-2:].upper()} {word.upper()}",  # initialism
+        ]
+        out.append((canon, aliases))
+    return out
+
 
 class Batch:
     """Generated records plus the truth key (settlement ids -> ledger ids)."""
@@ -68,9 +111,14 @@ def _fx(cur: str, month: str) -> float:
     return FX[(cur, "USD")][month]
 
 
-def generate(seed: int = 20260827) -> Batch:
+def generate(seed: int = 20260827,
+             vendors: list[tuple[str, list[str]]] | None = None) -> Batch:
     rng = random.Random(seed)
     b = Batch()
+    # A caller may supply its own counterparty universe (see scale.py); the
+    # fixed pool stays the default so every published figure is comparable.
+    pool = vendors or VENDORS
+    alias_of = {v[0]: v[1] for v in pool}
     base = date(2026, 3, 2)
     ctr = {"inv": 1000, "bank": 5000, "stp": 8000, "bill": 3000}
 
@@ -86,7 +134,7 @@ def generate(seed: int = 20260827) -> Batch:
 
     # ---- CASE 1: clean 1:1 AP settlements (the easy majority) ---------------
     for _ in range(16):
-        canon, aliases = rng.choice(VENDORS)
+        canon, aliases = rng.choice(pool)
         amt = money(rng.choice([1250, 340.50, 8900, 2115.75, 640, 12400.25, 775.10, 3300]))
         d0 = base + timedelta(days=rng.randint(0, 20))
         bill = b.add(Record(nid("bill"), "ERP_AP", "LEDGER", iso(d0), -amt, "USD",
@@ -100,7 +148,7 @@ def generate(seed: int = 20260827) -> Batch:
 
     # ---- CASE 2: cross-month timing lag, remittance reference stripped ------
     for _ in range(6):
-        canon, aliases = rng.choice(VENDORS)
+        canon, aliases = rng.choice(pool)
         amt = money(rng.choice([4820, 1990.40, 7350, 560.25]))
         d0 = date(2026, 3, 27) + timedelta(days=rng.randint(0, 3))
         bill = b.add(Record(nid("bill"), "ERP_AP", "LEDGER", iso(d0), -amt, "USD",
@@ -113,11 +161,10 @@ def generate(seed: int = 20260827) -> Batch:
         b.link([bk.id], [bill.id], "timing_lag_cross_month")
 
     # ---- CASE 3: FX bill settled in USD, plus an unbooked wire fee ----------
-    fx_cases = [("EUR", "Northwind Traders GmbH"), ("GBP", "Kestrel Analytics Ltd"),
-                ("EUR", "Northwind Traders GmbH"), ("INR", "Onyx Facilities Pvt Ltd"),
-                ("GBP", "Kestrel Analytics Ltd")]
+    _fx_names = [pool[i % len(pool)][0] for i in (2, 6, 2, 7, 6)]
+    fx_cases = list(zip(["EUR", "GBP", "EUR", "INR", "GBP"], _fx_names))
     for cur, canon in fx_cases:
-        aliases = ALIAS_OF[canon]
+        aliases = alias_of.get(canon) or pool[0][1]
         foreign = money(88000 if cur == "INR" else rng.choice([1000, 2500, 4200, 1800]))
         d0 = base + timedelta(days=rng.randint(2, 25))
         rate = _fx(cur, f"{d0.year}-{d0.month:02d}")
@@ -134,7 +181,7 @@ def generate(seed: int = 20260827) -> Batch:
 
     # ---- CASE 4: one remittance settling N bills (split payment) ------------
     for group in range(4):
-        canon, aliases = VENDORS[group]
+        canon, aliases = pool[group % len(pool)]
         ids: list[str] = []
         total = 0
         d0 = base + timedelta(days=rng.randint(3, 18))
@@ -168,7 +215,7 @@ def generate(seed: int = 20260827) -> Batch:
 
     # ---- CASE 6: short-pay against an open credit note ----------------------
     for _ in range(3):
-        canon, aliases = rng.choice(VENDORS)
+        canon, aliases = rng.choice(pool)
         amt = money(rng.choice([6200, 3400, 9100]))
         credit = money(rng.choice([200, 450.50, 175]))
         d0 = base + timedelta(days=rng.randint(4, 20))
@@ -186,7 +233,7 @@ def generate(seed: int = 20260827) -> Batch:
 
     # ---- CASE 7: tax-inclusive settlement vs tax-exclusive ledger line ------
     for rate_pct, juris in [(18, "IN_GST"), (20, "UK_VAT"), (18, "IN_GST"), (19, "DE_VAT")]:
-        canon, aliases = rng.choice(VENDORS)
+        canon, aliases = rng.choice(pool)
         net = money(rng.choice([1200, 5400, 860, 2300]))
         tax = int(round(net * rate_pct / 100))
         d0 = base + timedelta(days=rng.randint(2, 22))
@@ -201,7 +248,7 @@ def generate(seed: int = 20260827) -> Batch:
 
     # ---- CASE 8: genuinely unmatchable / must be escalated ------------------
     # 8a duplicate vendor billing, only one settlement exists
-    canon, aliases = VENDORS[5]
+    canon, aliases = pool[5 % len(pool)]
     amt = money(4500)
     d0 = base + timedelta(days=9)
     dupref = ref("INV")
@@ -229,7 +276,7 @@ def generate(seed: int = 20260827) -> Batch:
 
     # 8c open payables never settled in period (legitimately open)
     for _ in range(3):
-        canon, _aliases = rng.choice(VENDORS)
+        canon, _aliases = rng.choice(pool)
         amt = money(rng.choice([7700, 1450.60, 5200]))
         d0 = base + timedelta(days=rng.randint(18, 28))
         bill = b.add(Record(nid("bill"), "ERP_AP", "LEDGER", iso(d0), -amt, "USD",
@@ -239,7 +286,7 @@ def generate(seed: int = 20260827) -> Batch:
                  "Not yet due; no settlement expected within the period.")
 
     # 8d near-miss amount with no fee/tax/FX basis - possible wrong-amount payment
-    canon, aliases = VENDORS[8]
+    canon, aliases = pool[8 % len(pool)]
     d0 = base + timedelta(days=14)
     bill = b.add(Record(nid("bill"), "ERP_AP", "LEDGER", iso(d0), -money(9800), "USD",
                         f"Bill from {canon}", canon, ref("INV"),
@@ -255,7 +302,7 @@ def generate(seed: int = 20260827) -> Batch:
     # engine must recognise that no single settlement will ever tie out, and
     # that the *set* of them does.
     for _ in range(3):
-        canon, aliases = rng.choice(VENDORS)
+        canon, aliases = rng.choice(pool)
         total = money(rng.choice([10000, 24000, 15600]))
         d0 = base + timedelta(days=rng.randint(2, 12))
         bill = b.add(Record(nid("bill"), "ERP_AP", "LEDGER", iso(d0), -total, "USD",
@@ -276,7 +323,7 @@ def generate(seed: int = 20260827) -> Batch:
     # Three bank lines for one economic event. Booking the reversal against the
     # bill would understate the expense; missing the pair double-counts it.
     for _ in range(2):
-        canon, aliases = rng.choice(VENDORS)
+        canon, aliases = rng.choice(pool)
         amt = money(rng.choice([8000, 3450, 11200]))
         d0 = base + timedelta(days=rng.randint(4, 16))
         bill = b.add(Record(nid("bill"), "ERP_AP", "LEDGER", iso(d0), -amt, "USD",
