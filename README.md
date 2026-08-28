@@ -19,6 +19,28 @@ trace.
 
 Zero third-party dependencies. Python 3.11+, standard library only.
 
+### Run it as a service
+
+```bash
+python -m ledgerguard.server          # http://localhost:8000
+```
+
+| Route | |
+|---|---|
+| `GET /` | the demo page |
+| `GET /health` | liveness |
+| `POST /api/close` | `{"seed": 20260827}` → the full close as JSON |
+| `GET /api/trace?id=BANK-5024` | one settlement's decision path |
+
+```bash
+curl -s localhost:8000/api/close -d '{"seed":20260827}' | head -40
+curl -s "localhost:8000/api/trace?id=BANK-5024"
+```
+
+`render.yaml` deploys this as a single free service — no database, no
+dependencies to install, and the demo page still works while a free instance is
+cold because the engine runs client-side.
+
 ```bash
 python -m ledgerguard.cli                 # close one batch, full report
 python -m ledgerguard.trace BANK-5024     # one settlement's full decision path
@@ -339,6 +361,7 @@ ledgerguard/
   redteam.py      hostile planners vs. the containment claim
   scale.py        growth curve and the density limit
   build_web.py    inlines the library into a browser demo (Pyodide)
+  server.py       stdlib HTTP service: demo page + JSON API
   report.py       HTML close report, generated from run output
   verify_claims.py  turns every accuracy claim into a build gate
   check_readme.py   asserts this README matches the committed run

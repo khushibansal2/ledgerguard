@@ -1,0 +1,19 @@
+# Render blueprint. One service, no dependencies to install.
+#
+# The demo page runs the engine client-side under Pyodide, so it keeps working
+# while a free-tier instance is cold; the API is for scripting a close or
+# proving the same numbers come out of a server as out of the CLI.
+services:
+  - type: web
+    name: ledgerguard
+    runtime: python
+    plan: free
+    region: singapore
+    # Regenerates the demo page from library source at deploy time, so what is
+    # served can never drift from the code it claims to run.
+    buildCommand: python -m ledgerguard.build_web
+    startCommand: python -m ledgerguard.server
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.4"
