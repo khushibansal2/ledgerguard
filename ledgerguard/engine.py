@@ -174,7 +174,15 @@ class Controller:
                          if i in self.by_id))
         ledger = abs(sum(self.by_id[i].amount for i in m.ledger_ids
                          if i in self.by_id))
-        return max(settle, ledger)
+        # The largest single line matters too, because netting can hide the
+        # risk entirely: a reversal pair sums to zero, so on net alone a
+        # $500,000 return would be authorised at the same rung as an $80 one.
+        # Nothing moved on net, but getting the pairing wrong still leaves a
+        # half-million-dollar invoice in the wrong state.
+        biggest = max((abs(self.by_id[i].amount)
+                       for i in m.settlement_ids + m.ledger_ids
+                       if i in self.by_id), default=0)
+        return max(settle, ledger, biggest)
 
     def _book(self, m: Match, driver: Record) -> None:
         ok, why = self.policy.gate(m, self._exposure(m))

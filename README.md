@@ -12,6 +12,11 @@ PROCESSOR├──► RECONCILE ──► RESOLVE ──► POLICY GATE ─┬�
                                                             needed to close it
 ```
 
+**Live demo: https://khushibansal2.github.io/ledgerguard/** — the real engine,
+compiled to WebAssembly and running in your browser. No server, no API key,
+nothing to keep alive. Close a batch, click any settlement, read its decision
+trace.
+
 Zero third-party dependencies. Python 3.11+, standard library only.
 
 ```bash
@@ -307,10 +312,12 @@ ledgerguard/
   trace.py        replay one decision from the audit trail
   redteam.py      hostile planners vs. the containment claim
   scale.py        growth curve and the density limit
+  build_web.py    inlines the library into a browser demo (Pyodide)
   report.py       HTML close report, generated from run output
   verify_claims.py  turns every accuracy claim into a build gate
   check_readme.py   asserts this README matches the committed run
 tests/            16 property invariants
+web/              generated single-page demo, deployed to GitHub Pages
 out/              results.json, aggregate.json, ablation.json, dashboard.html
 ```
 
