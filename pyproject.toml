@@ -16,12 +16,11 @@ classifiers = [
   "Topic :: Office/Business :: Financial :: Accounting",
   "License :: OSI Approved :: MIT License",
 ]
-# No runtime dependencies. The deterministic core is stdlib-only on purpose:
-# every score in it can be re-derived by hand during an audit.
+# No dependencies at all - not even for the optional LLM planner, which speaks
+# the OpenAI chat-completions dialect over urllib. Every score in the
+# deterministic core can be re-derived by hand during an audit, and nothing
+# here pins a vendor.
 dependencies = []
-
-[project.optional-dependencies]
-llm = ["anthropic>=0.40"]
 
 [project.scripts]
 ledgerguard = "ledgerguard.cli:main"

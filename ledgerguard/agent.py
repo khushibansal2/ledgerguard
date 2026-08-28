@@ -397,54 +397,106 @@ class HeuristicPlanner:
 class LLMPlanner:
     """Optional LLM-backed planner. Same tool belt, same gates.
 
-    It sees the settlement line and candidate documents and returns an ordered
+    It sees the settlement and the candidate documents and returns an ordered
     hypothesis list. It cannot book, cannot compute, and cannot widen the
     residual tolerance - a bad plan costs a few extra tool calls and then falls
-    through to the same refusal path.
+    through to the same refusal path. `redteam.py` demonstrates that against
+    six deliberately hostile planners rather than asserting it.
+
+    Spoken over plain HTTP in the OpenAI chat-completions dialect rather than
+    through a vendor SDK. Three reasons, in order of importance:
+
+      1. It keeps the project dependency-free. urllib is standard library, so
+         the whole controller still installs with nothing.
+      2. Every provider worth using speaks this dialect - including the free
+         tiers and a locally-run Ollama - so demonstrating the agentic path
+         does not require anybody's paid account.
+      3. A vendor SDK here would quietly make one company's uptime a
+         dependency of closing the books, which is the precise thing this
+         architecture exists to avoid.
+
+    Configured entirely by environment (see README for free providers):
+
+        LEDGERGUARD_API_BASE   e.g. https://api.groq.com/openai/v1
+        LEDGERGUARD_MODEL      e.g. llama-3.3-70b-versatile
+        LEDGERGUARD_API_KEY    omit entirely for a local Ollama
+
+    No vendor or model id is hardcoded: pinning one in source is how a system
+    quietly stops working the day that id is retired.
     """
 
-    # No vendor or model is hardcoded: a controller should be able to swap the
-    # planner without a code change, and pinning a model id in the source is how
-    # a system quietly stops working when that id is retired.
-    DEFAULT_MODEL = os.environ.get("LEDGERGUARD_MODEL", "")
+    TIMEOUT = 12.0
+    VALID = {"fx", "fee", "tax", "split", "instalment"}
 
-    def __init__(self, model: str | None = None) -> None:
-        self.model = model or self.DEFAULT_MODEL
+    def __init__(self, model: str | None = None, api_base: str | None = None,
+                 api_key: str | None = None) -> None:
+        self.model = model or os.environ.get("LEDGERGUARD_MODEL", "")
+        self.api_base = (api_base or os.environ.get("LEDGERGUARD_API_BASE", "")).rstrip("/")
+        self.api_key = api_key or os.environ.get("LEDGERGUARD_API_KEY", "")
         self.fallback = HeuristicPlanner()
-        try:
-            import anthropic  # noqa: F401
-            self.client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-            self.available = True
-        except Exception:
-            self.client = None
-            self.available = False
+        self.available = bool(self.model and self.api_base)
+        self.calls = 0
+        self.failures = 0
+
+    def _prompt(self, s: Record, cands: list[Record]) -> str:
+        lines = "\n".join(
+            f"- {c.id} {c.doc_type} {fmt(c.amount, c.currency)} "
+            f"'{c.counterparty}' dated {c.txn_date}"
+            + (f" meta={c.meta}" if c.meta else "")
+            for c in cands)
+        return (
+            "You are a financial controller triaging one unreconciled "
+            "settlement. Decide which explanations are worth testing, in order.\n\n"
+            f"SETTLEMENT: {s.id}, {fmt(s.amount, s.currency)} on {s.txn_date}, "
+            f"bank descriptor '{s.description}'.\n\n"
+            f"OPEN LEDGER DOCUMENTS:\n{lines}\n\n"
+            "HYPOTHESES:\n"
+            "  fx          the document is in another currency\n"
+            "  fee         a processor or wire fee was deducted from a gross amount\n"
+            "  tax         the document is tax-exclusive, the payment tax-inclusive\n"
+            "  split       one payment covers several documents, maybe net of a credit note\n"
+            "  instalment  this payment is one of several clearing a single larger bill\n\n"
+            "Return ONLY a JSON array of hypothesis names, most likely first. "
+            "Do not do arithmetic and do not explain - a deterministic tool "
+            "verifies each hypothesis and a policy gate decides what is booked.")
+
+    def _post(self, prompt: str) -> str:
+        import json
+        import urllib.request
+
+        body = json.dumps({
+            "model": self.model,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0,
+            "max_tokens": 120,
+        }).encode("utf-8")
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+        req = urllib.request.Request(f"{self.api_base}/chat/completions",
+                                     data=body, headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=self.TIMEOUT) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+        return payload["choices"][0]["message"]["content"]
 
     def plan(self, s: Record, cands: list[Record]) -> list[str]:
+        """Never raises. A planner is an accelerator, so if it is slow, wedged,
+        rate-limited or talking nonsense the close continues on the built-in
+        ordering and the only thing that changes is the tool-call count."""
         if not self.available:
             return self.fallback.plan(s, cands)
-        lines = "\n".join(
-            f"- {c.id} {c.doc_type} {fmt(c.amount, c.currency)} {c.currency} "
-            f"'{c.counterparty}' dated {c.txn_date} meta={c.meta}" for c in cands)
-        prompt = (
-            "You are a financial controller triaging one unreconciled settlement.\n"
-            f"SETTLEMENT: {s.id} {fmt(s.amount, s.currency)} {s.currency} on "
-            f"{s.txn_date}, descriptor '{s.description}'.\n"
-            f"OPEN LEDGER DOCUMENTS:\n{lines}\n\n"
-            "Available hypotheses: fx (foreign-currency conversion, possibly plus a "
-            "wire fee), fee (processor/wire fee deducted from a gross amount), "
-            "tax (document is tax-exclusive, settlement is tax-inclusive), "
-            "split (one remittance covering several documents, possibly net of a "
-            "credit note).\n"
-            "Return ONLY a JSON array of hypothesis names, most likely first. "
-            "Do not perform arithmetic; a deterministic tool will verify each one.")
+        import json
+        self.calls += 1
         try:
-            import json
-            resp = self.client.messages.create(
-                model=self.model, max_tokens=200,
-                messages=[{"role": "user", "content": prompt}])
-            text = resp.content[0].text.strip()
+            text = self._post(self._prompt(s, cands))
             text = text[text.index("["):text.rindex("]") + 1]
-            got = [h for h in json.loads(text) if h in {"fx", "fee", "tax", "split", "instalment"}]
-            return got or self.fallback.plan(s, cands)
+            got = [h for h in json.loads(text)
+                   if isinstance(h, str) and h in self.VALID]
+            # Deduplicate while keeping the model's ordering - that ordering is
+            # the entire contribution it is permitted to make.
+            seen: set[str] = set()
+            plan = [h for h in got if not (h in seen or seen.add(h))]
+            return plan or self.fallback.plan(s, cands)
         except Exception:
+            self.failures += 1
             return self.fallback.plan(s, cands)

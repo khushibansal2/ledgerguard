@@ -71,6 +71,32 @@ that fail to tie out.
 | **L2** | Similarity | amount ties out; entity and timing inferred | never |
 | **L3** | Agentic | amount does *not* tie out — prove the difference | may order hypotheses |
 
+### Running the model path (free, no paid account)
+
+The planner speaks the OpenAI chat-completions dialect over `urllib`, so any
+provider works and none is pinned in source. Three environment variables:
+
+```bash
+# Groq - free tier, no card required (console.groq.com/keys)
+export LEDGERGUARD_API_BASE=https://api.groq.com/openai/v1
+export LEDGERGUARD_MODEL=llama-3.3-70b-versatile
+export LEDGERGUARD_API_KEY=gsk_...
+
+# or Google AI Studio - free tier (aistudio.google.com/apikey)
+export LEDGERGUARD_API_BASE=https://generativelanguage.googleapis.com/v1beta/openai
+export LEDGERGUARD_MODEL=gemini-2.0-flash
+
+# or Ollama - entirely local, no key, no account, works offline
+export LEDGERGUARD_API_BASE=http://localhost:11434/v1
+export LEDGERGUARD_MODEL=llama3.1
+
+python -m ledgerguard.cli --llm
+```
+
+Model ids move; check the provider's current list if one is rejected. Nothing
+above is required — with no configuration the built-in planner runs the same
+hypothesis set, which is why the hosted demo needs no key at all.
+
 **A match at L3 must be arithmetically closed.** The resolver may only book a
 difference it can name and compute — *this* FX rate, *that* fee schedule, *this*
 statutory tax rate. "These look related" is not an explanation. The LLM chooses
