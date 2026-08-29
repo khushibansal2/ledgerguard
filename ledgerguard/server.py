@@ -34,6 +34,7 @@ from .audit import AuditLog
 from .engine import Controller, Policy
 from .evaluate import evaluate
 from .forecast import CashForecast
+from .agent import LLMPlanner
 from .generate import generate
 from .models import fmt
 from .trace import render
@@ -49,12 +50,30 @@ _CACHE_MAX = 32
 _CTRLS: dict[int, Controller] = {}
 
 
-def close_batch(seed: int) -> dict:
-    if seed in _CACHE:
-        return _CACHE[seed]
+def close_batch(seed: int, use_llm: bool = False) -> dict:
+    """Close one batch. `use_llm` routes L3 hypothesis ordering through the
+    configured provider.
+
+    Opt-in per request rather than on by default, for three reasons: the
+    deterministic path is the honest default and should be what a visitor sees
+    first; a model call adds latency to a demo that is otherwise instant; and
+    leaving it switchable lets someone compare the two closes side by side and
+    see for themselves that the ledger does not change - only the tool-call
+    count does.
+    """
+    key = (seed, use_llm)
+    if key in _CACHE:
+        return _CACHE[key]
+
+    planner = None
+    if use_llm:
+        planner = LLMPlanner()
+        if not planner.available:
+            planner = None
 
     batch = generate(seed=seed)
-    ctrl = Controller(batch.records, policy=Policy(), audit=AuditLog())
+    ctrl = Controller(batch.records, policy=Policy(), audit=AuditLog(),
+                      planner=planner)
     t0 = time.perf_counter()
     ctrl.run()
     ms = (time.perf_counter() - t0) * 1000
@@ -64,6 +83,18 @@ def close_batch(seed: int) -> dict:
 
     result = {
         "seed": seed,
+        # Reported so the model path can be audited from the outside: whether a
+        # planner was actually used, how often it answered, and how often it
+        # failed and fell back. A demo that claims to be agentic should be able
+        # to show its working.
+        "planner": {
+            "used": planner is not None,
+            "requested": use_llm,
+            "kind": type(planner).__name__ if planner else "HeuristicPlanner",
+            "model": getattr(planner, "model", "") or None,
+            "calls": getattr(planner, "calls", 0),
+            "fallbacks": getattr(planner, "failures", 0),
+        },
         "totals": ev["totals"],
         "accuracy": ev["accuracy"],
         "value": ev["value"],
@@ -89,8 +120,8 @@ def close_batch(seed: int) -> dict:
         oldest = next(iter(_CACHE))
         _CACHE.pop(oldest, None)
         _CTRLS.pop(oldest, None)
-    _CACHE[seed] = result
-    _CTRLS[seed] = ctrl
+    _CACHE[key] = result
+    _CTRLS[key] = ctrl
     return result
 
 
@@ -121,7 +152,14 @@ class Handler(BaseHTTPRequestHandler):
         path = route.path.rstrip("/") or "/"
 
         if path == "/health":
-            return self._json(200, {"status": "ok", "cached_batches": len(_CACHE)})
+            planner = LLMPlanner()
+            return self._json(200, {
+                "status": "ok",
+                "cached_batches": len(_CACHE),
+                # Whether a model is configured, never what the key is.
+                "llm_configured": planner.available,
+                "llm_model": planner.model or None,
+            })
 
         if path == "/":
             if not PAGE.exists():
@@ -136,14 +174,16 @@ class Handler(BaseHTTPRequestHandler):
             seed = int((q.get("seed") or ["20260827"])[0])
             if not sid:
                 return self._json(400, {"error": "missing ?id=<settlement id>"})
-            close_batch(seed)          # ensures the controller exists
-            text = render(_CTRLS[seed], sid)
+            llm = (q.get("llm") or ["0"])[0] in ("1", "true", "yes")
+            close_batch(seed, llm)     # ensures the controller exists
+            text = render(_CTRLS[(seed, llm)], sid)
             return self._send(200, text.encode("utf-8"), "text/plain; charset=utf-8")
 
         if path == "/api/close":
             q = parse_qs(route.query)
             seed = int((q.get("seed") or ["20260827"])[0])
-            return self._json(200, close_batch(seed))
+            llm = (q.get("llm") or ["0"])[0] in ("1", "true", "yes")
+            return self._json(200, close_batch(seed, llm))
 
         self._json(404, {"error": "not found",
                          "routes": ["/", "/health", "/api/close", "/api/trace"]})
@@ -155,9 +195,10 @@ class Handler(BaseHTTPRequestHandler):
             n = int(self.headers.get("Content-Length") or 0)
             body = json.loads(self.rfile.read(n) or b"{}")
             seed = int(body.get("seed", 20260827))
+            llm = bool(body.get("llm", False))
         except Exception as exc:
             return self._json(400, {"error": f"bad request: {exc}"})
-        self._json(200, close_batch(seed))
+        self._json(200, close_batch(seed, llm))
 
     def do_OPTIONS(self) -> None:
         self.send_response(204)

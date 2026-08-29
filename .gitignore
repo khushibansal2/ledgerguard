@@ -5,3 +5,9 @@ venv/
 .pytest_cache/
 .DS_Store
 out/audit.jsonl
+
+# never commit secrets
+.env
+.env.*
+*.key
+secrets.json

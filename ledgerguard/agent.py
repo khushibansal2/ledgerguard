@@ -425,7 +425,7 @@ class LLMPlanner:
     quietly stops working the day that id is retired.
     """
 
-    TIMEOUT = 12.0
+    TIMEOUT = 20.0
     VALID = {"fx", "fee", "tax", "split", "instalment"}
 
     def __init__(self, model: str | None = None, api_base: str | None = None,
@@ -468,9 +468,18 @@ class LLMPlanner:
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0,
-            "max_tokens": 120,
+            # Generous, because reasoning-style models spend their budget
+            # thinking before they answer and return an empty string if they
+            # run out - which looks like a broken planner and is really a
+            # truncated one.
+            "max_tokens": 512,
         }).encode("utf-8")
-        headers = {"Content-Type": "application/json"}
+        # An explicit User-Agent is not politeness, it is required: several
+        # providers sit behind a WAF that rejects urllib's default signature
+        # outright (Cloudflare 1010), which surfaces as a 403 that looks exactly
+        # like a bad key and sends you hunting for the wrong bug.
+        headers = {"Content-Type": "application/json",
+                   "User-Agent": "LedgerGuard/1.0 (+https://github.com/khushibansal2/ledgerguard)"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
         req = urllib.request.Request(f"{self.api_base}/chat/completions",

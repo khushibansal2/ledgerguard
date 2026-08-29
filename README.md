@@ -101,7 +101,7 @@ provider works and none is pinned in source. Three environment variables:
 ```bash
 # Groq - free tier, no card required (console.groq.com/keys)
 export LEDGERGUARD_API_BASE=https://api.groq.com/openai/v1
-export LEDGERGUARD_MODEL=llama-3.3-70b-versatile
+export LEDGERGUARD_MODEL=qwen/qwen3.8-27b
 export LEDGERGUARD_API_KEY=gsk_...
 
 # or Google AI Studio - free tier (aistudio.google.com/apikey)
@@ -115,7 +115,22 @@ export LEDGERGUARD_MODEL=llama3.1
 python -m ledgerguard.cli --llm
 ```
 
-Model ids move; check the provider's current list if one is rejected. Nothing
+Measured on one batch, deterministic planner versus a live Groq call:
+
+| | Booked | Exceptions | Precision | Mis-booked | Tool calls |
+|---|---|---|---|---|---|
+| built-in planner | 48 | 21 | 100% | $0 | 106 |
+| LLM planner (25 live calls, 6 fell back) | 48 | 21 | 100% | $0 | **98** |
+
+The ledger is identical. The model earned an 8% reduction in tool calls through
+better hypothesis ordering, and six of its twenty-five calls failed outright and
+fell through to the built-in ordering without anyone noticing. That is the whole
+claim: the model changes cost, not correctness.
+
+Model ids move; check the provider's current list if one is rejected. Note that
+reasoning-style models can spend their entire token budget thinking and return
+an empty string, and that some providers sit behind a WAF that rejects urllib's
+default User-Agent with a 403 that looks exactly like a bad key. Nothing
 above is required — with no configuration the built-in planner runs the same
 hypothesis set, which is why the hosted demo needs no key at all.
 
